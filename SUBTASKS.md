@@ -26,6 +26,18 @@ Permitir al bibliotecario ver si un libro esta disponible o prestado y consultar
 - Calidad: Conviene verificar que la consulta no solo traiga el libro, si no también el contexto mínimo necesario para decidir si puede prestarse.
 
 ## HU-02 - Registrar libro disponible a un lector habilitado
+### Objetivo de la historia
+Permitir registrar un libro como prestado a un lector siempre y cuando se estén cumpliendo todas normativas de préstamo, y registrar el prestamo en el historial.
+
+### Subtareas DEV
+- UI con inputs para ingresar datos necesarios para un prestamo.
+- Endpoint POST api/v1/loan para registrar un prestamo.
+- Tabla DB con lectores morosos.
+- Método de búsqueda de lector moroso.
+
+### Subtareas QA
+
+### Riesgo o notas de calidad
 
 ### Objetivo de la historia
 Permitir al bibliotecario registrar el préstamo de un libro disponible a un lector sin multas impagas, definiendo correctamente el plazo y la fecha de devolución.
