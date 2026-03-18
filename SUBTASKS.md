@@ -322,6 +322,18 @@ Permitir al bibliotecario registrar el préstamo de un libro disponible a un lec
 - Calidad: conviene verificar explícitamente los casos borde definidos en el PRD para confirmar que la acumulación Fibonacci sea correcta.
 
 ## HU-05 - Consultar libros fuera de plazo y lector responsable
+### Objetivo de la historia
+Consultar los libros que están fuera de plazo y visualizar la información del lector responsable del préstamo y tener información para la toma de decisión.
+
+### Subtareas DEV
+- UI de lista de préstamos
+- Endpoint GET api/v1/loan/outTime
+- Comunicación UI con endpoint
+
+### Subtareas QA
+
+### Riesgo o notas de calidad
+
 
 ### Objetivo de la historia
 - Permitir al bibliotecario consultar los préstamos vencidos junto con el lector responsable y la información mínima de seguimiento para gestionar deudas atrasadas.
