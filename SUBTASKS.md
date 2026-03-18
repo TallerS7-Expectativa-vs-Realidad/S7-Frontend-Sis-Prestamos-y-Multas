@@ -53,6 +53,21 @@ Permitir al bibliotecario registrar el préstamo de un libro disponible a un lec
 - Calidad: conviene verificar los tres plazos permitidos y asegurar que cualquier otro valor quede explícitamente rechazado.
 
 ## HU-03 - Registrar devolución de un libro dentro del plazo
+**Objetivo de la historia**
+Registrar la devolución en tiempo y forma de un libro prestado sin generar ninguna multa al lector.
+
+**Subtareas DEV**
+- inputs UI para indicar nombre del libro y el identificador del lector
+- comunicación UI con endpoint
+- endpoint PUT api/v1/loan con la información actualizada del libro (fecha actual y confirmación de devolución)
+- método para calcular el tiempo de demora
+- método para marcar como devuelto el libro
+
+**Subtareas QA**
+
+
+**Riesgo o notas de calidad**
+- Si el identificador del lector se escribió mal previamente, no se puede recuperar la información del prestamo.
 
 ### Objetivo de la historia
 - Permitir al Bibliotecario registrar la devolución de un libro en o antes de la fecha límite para cerrar el préstamo sin generar multa y dejar nuevamente el libro disponible.
