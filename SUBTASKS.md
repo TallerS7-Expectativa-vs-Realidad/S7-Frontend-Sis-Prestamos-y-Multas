@@ -272,13 +272,21 @@ Permitir al bibliotecario registrar el préstamo de un libro disponible a un lec
 Registrar la devolución fuera de tiempo de un libro prestado y generar automáticamente la multa correspondiente al lector responsable.
 
 ### Subtareas DEV
+- Inputs UI para indicar nombre del libro y el identificador del lector
+- Comunicación UI con endpoint
+- Endpoint PUT api/v1/loan con la información actualizada del libro (fecha - actual y confirmación de devolución)
+- Método para calcular el tiempo de demora
+- Método para calcular multa utilizando fibonacci
+- Método para marcar como devuelto el libro
+- Tabla DB con lectores morosos.
+- Método de guardado de multa. 
 
 
 ### Subtareas QA
 
 
 ### Riesgo o notas de calidad
-
+- 
 
 ### Objetivo de la historia
 - Permitir al bibliotecario registrar la devolución tardía de un libro para calcular la multa acumulada con la lógica Fibonacci y dejar trazabilidad de la deuda del lector.
