@@ -114,20 +114,10 @@
 - Requiere que exista un préstamo activo registrado.
   
 ## Criterio de Aceptación
-- Una devolución en fecha o antes de la fecha no genera multa.
-- El préstamo debe quedar cerrado al registrar la devolución válida.
-- El libro vuelve a quedar disponible.
-- Si no existe un préstamo activo, la operación no debe avanzar.
 
 **Gherkin**:
 ```gherkin
-    Scenario: Registrar una devolución en fecha
-    Given existe un préstamo activo
-    And la devolución ocurre en o antes de la fecha límite
-    When el bibliotecario registra la devolución
-    Then el sistema cierra el préstamo
-    And no genera multa
-    And deja el libro disponible
+    
 ```
 
 ## Justificación de criterios INVEST - HU-03
