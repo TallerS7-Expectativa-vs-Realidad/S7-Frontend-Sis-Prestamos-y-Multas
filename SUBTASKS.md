@@ -82,6 +82,17 @@ Permitir al bibliotecario registrar el préstamo de un libro disponible a un lec
 - Calidad: Conviene verificar el borde exacto de la fecha límite para evitar penalizar devoluciones válidas realizadas a tiempo.
 
 ## HU-04 - Registrar devolución tardía y generar multa Fibonacci
+### Objetivo de la historia
+Registrar la devolución fuera de tiempo de un libro prestado y generar automáticamente la multa correspondiente al lector responsable.
+
+### Subtareas DEV
+
+
+### Subtareas QA
+
+
+### Riesgo o notas de calidad
+
 
 ## HU-05 - Consultar libros fuera de plazo y lector responsable
 
