@@ -455,27 +455,3 @@ GET /api/v1/readers/debt?typeId=*tipo de id*&id=*identificador*&name=*nombre*
 ### Riesgo o notas de calidad
 
 
-## PLANTILLA
-```md
-## HU-[00] - [Título]
-
-**Objetivo de la historia**
-- Resumen corto de su funcionalidad
-
-**Subtareas DEV**
-- [Modelo o entidad]
-- [Regla o servicio de dominio]
-- [Persistencia o repositorio]
-- [Endpoint o caso de uso]
-- [Pruebas unitarias técnicas]
-
-**Subtareas QA**
-- [Diseñar matriz de Casos de Prueba]
-- [Preparar Datos de prueba]
-- [Validar camino feliz]
-- [Validar alternos y bordes]
-- [Registrar evidencia y fallos si aplicase]
-
-**Riesgo o notas de calidad**
-- [Riesgo funcional, técnico o de aceptación]
-```
