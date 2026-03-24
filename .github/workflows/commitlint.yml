@@ -1,0 +1,49 @@
+name: Commit Message Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  validate-commits:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        run: |
+          echo "Validating commits..."
+
+          errors=0
+
+          while IFS="|" read -r hash commit; do
+            echo "----------------------------------------"
+            echo "Checking commit: $hash"
+            echo "$commit"
+            echo "----------------------------------------"
+
+            if [[ ! $commit =~ ^(feat|fix|docs|style|refactor|test|chore|ci|build)(\([a-zA-Z0-9_-]+\))?:\ .+ ]]; then
+              echo "❌ Invalid commit message"
+              echo "Commit ID: $hash"
+              echo "Message: $commit"
+              echo ""
+              errors=$((errors + 1))
+            else
+              echo "✅ Valid"
+            fi
+
+          done < <(git log origin/${{ github.base_ref }}..HEAD --no-merges --pretty=format:"%h|%s")
+
+          echo "----------------------------------------"
+          echo "Total errors: $errors"
+
+          if (( errors > 0 )); then
+            echo "❌ Found $errors invalid commit(s)"
+            exit 1
+          else
+            echo "✅ All commit messages are valid"
+          fi
