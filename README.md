@@ -1,6 +1,6 @@
-# Biblioteca: Sistema de Préstamos y Multas
+# Biblioteca: Sistema de Prestamos y Multas
 
-MVP documental para definir cómo una biblioteca controla préstamos de libros, fechas de devolución, multas por retraso y rehabilitación del lector después del pago.
+Repositorio de trabajo para el taller de la semana 7. El objetivo ya no es solo documentar el producto, sino usar esa base para construir un MVP funcional, integrado y trazable usando un flujo de trabajo compatible con ASDD.
 
 ## Equipo
 
@@ -18,7 +18,104 @@ La biblioteca necesita una forma clara y consistente de:
 - bloquear nuevos préstamos a lectores con deuda pendiente;
 - rehabilitar al lector cuando paga la multa completa.
 
-Esta entrega no construye todavía el software. Su objetivo es dejar una base de producto y backlog lista para implementación posterior.
+En esta etapa el equipo busca aterrizar esas reglas en una implementación mínima que permita demostrar el flujo principal del negocio y preparar la evidencia QA del sprint.
+
+## Estado actual del proyecto
+
+- Estado: en transición de MVP documental a MVP implementable.
+- Estrategia de trabajo: micro-sprints con reparto QA y DEV.
+- Framework de apoyo: ASDD como flujo de requerimiento -> spec -> implementación -> tests -> QA.
+
+## Stack real del proyecto
+
+- Backend: JavaScript
+- Frontend: React
+- Base de Datos: PostgreSQL
+
+## Alcance técnico actual del MVP
+
+La implementación actual se enfocará en el flujo principal del sistema:
+
+- consulta mínima de disponibilidad de libro usando historial;
+- registro de préstamo;
+- devolución dentro del plazo;
+- devolución tardía con multa acumulativa;
+- bloqueo de préstamo a lector con deuda pendiente;
+- preparación documental para pago de deuda y rehabilitación.
+
+## Decisiones de modelado para este sprint
+
+Para no abrir alcance innecesario en este sprint:
+
+- no habrá catálogo formal de libros;
+- no habrá recurso CRUD independiente de lectores;
+- el historial de préstamos será la fuente de verdad operativa sobre disponibilidad;
+- los datos del lector vivirán embebidos dentro del préstamo y la deuda;
+- las entidades mínimas del MVP son `loan_books` y `debt_reader`.
+
+Interpretación operativa acordada:
+
+- si un libro no aparece en el historial, se asume que no tiene préstamos previos y está disponible para préstamo;
+- esto no significa que exista un catálogo completo de biblioteca, solo que el MVP trabaja con historial como fuente operativa.
+
+### Estados oficiales
+
+**loan.state**
+- `ON_LOAN`
+- `RETURNED`
+
+**debt.state_debt**
+- `PENDING`
+- `PAID`
+
+## Entidades mínimas
+
+### `loan_books`
+
+- `loan_id`
+- `id_book`
+- `title`
+- `state`
+- `type_id_reader`
+- `id_reader`
+- `name_reader`
+- `date_limit`
+- `date_return`
+
+### `debt_reader`
+
+- `id_debt`
+- `loan_id`
+- `type_id_reader`
+- `id_reader`
+- `name_reader`
+- `amount_debt`
+- `state_debt`
+
+## Convenciones de API recomendadas
+
+- Actualmente el equipo identificó como base los recursos `loans` y `debts`.
+- Usar versión en la ruta: `/api/v1/...`;
+
+Base sugerida para este MVP:
+
+- `GET /api/v1/loans/{name}`
+- `POST /api/v1/loans`
+- `PATCH /api/v1/loans`
+- `GET /api/v1/debts/...` para fases posteriores
+- `PATCH /api/v1/debts/{id}` para fases posteriores
+
+## Contexto ASDD para este repositorio
+
+Uso recomendado:
+
+1. definir el requerimiento en `.github/requirements/`;
+2. generar spec en `.github/specs/`;
+3. revisar y aprobar la spec manualmente;
+4. implementar con la spec como fuente de verdad;
+5. derivar tests y artefactos QA desde la misma spec.
+
+ASDD se usará como marco de trabajo y trazabilidad. No obliga a copiar literalmente el stack del template, porque el stack real del proyecto es JavaScript + React + PostgreSQL.
 
 ## Qué incluye este repositorio
 
@@ -28,7 +125,7 @@ Esta entrega no construye todavía el software. Su objetivo es dejar una base de
 - Trazabilidad documental del flujo principal del MVP.
 - Referencia al tablero de GitHub Projects para el backlog del taller.
 
-## Alcance del MVP documental
+## Alcance del MVP
 
 ### Dentro del alcance
 
@@ -97,10 +194,10 @@ Una historia se considera lista cuando:
 
 ## Definition of Done
 
-Para esta entrega documental, una historia se considera terminada cuando:
+Para este momento del taller, una historia se considera terminada cuando:
 
-- Queda redactada en [USER_STORIES.md](https://github.com/GabrielGNP/S6-Biblioteca-Sistema-de-Prestamos-y-Multas/blob/main/USER_STORIES.md).
-- Tiene criterios de aceptación y escenarios Gherkin.
-- Tiene subtareas DEV y QA en [SUBTASKS.md](https://github.com/GabrielGNP/S6-Biblioteca-Sistema-de-Prestamos-y-Multas/blob/main/SUBTASKS.md).
-- Su estimación es coherente con el trabajo descrito.
-- Mantiene consistencia con el PRD y con el tablero.
+- Tiene requerimiento y, cuando aplique, spec ASDD aprobada.
+- Mantiene consistencia con el PRD, las subtareas y el sprint activo.
+- Tiene comportamiento implementado o documentado según el alcance del sprint.
+- Tiene criterios de aceptación verificables.
+- Tiene evidencia QA o trazabilidad de validación.
