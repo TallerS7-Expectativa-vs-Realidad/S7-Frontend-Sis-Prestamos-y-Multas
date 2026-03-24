@@ -85,10 +85,10 @@ La información recuperada en esta funcionalidad es:
 
 
 ### Subtareas QA
-- TQA01-01: Diseñar escenarios para consulta de libro disponible, libro prestado y libro inexistente.
+- TQA01-01: Diseñar escenarios para consulta de libro disponible, libro prestado y libro sin historial de préstamo.
 - TQA01-02: Preparar datos con al menos un libro disponible, uno prestado y uno con historial de préstamos más extenso.
 - TQA01-03: Validar que el sistema muestre correctamente el estado del libro, préstamo activo e historial básico.
-- TQA01-04: Validar alternos como libro inexistente, o libro con información histórica incompleta.
+- TQA01-04: Validar alternos como libro inexistente, o libro con historial inconsistente o con último estado no determinable.
 - TQA01-05: Validar que la consulta del libro distinga préstamos activos y préstamos cerrados dentro del historial.
 - TQA01-06: Registrar evidencia del resultado esperado y obtenido para cada escenario, y documentar defectos si aparecen inconsistencias.
 
@@ -280,7 +280,7 @@ Si todas las comprobaciones pasan, entonces se guarda en la tabla "loan_books" l
 - TQA02-01: Diseñar escenarios para préstamos exitosos, libros ya prestados, lector con deuda pendiente y plazo no permitido.
 - TQA02-02: Preparar datos con al menos un libro disponible, uno prestado, un lector habilitado y un lector bloqueado por deuda.
 - TQA02-03: Validar que el sistema registre correctamente un préstamo cuando se cumplen todas las reglas del negocio.
-- TQA02-04: Validar alternos como libro inexistente, lector inexistente o error en el cálculo de la fecha de devolución.
+- TQA02-04: Validar alternos como libro con préstamo activo, lector inexistente o error en el cálculo de la fecha de devolución.
 - TQA02-05: Registrar evidencia del resultado esperado y obtenido para cada escenario, y documentar defectos si aparecen inconsistencias.
 
 ### Riesgo o notas de calidad
@@ -592,7 +592,7 @@ la cantidad de semanas será la cantidad de iteraciones de fibonacci. Se debe te
 1 -> semana 2 \
 2 -> semana 3 \
 3 -> semana 4 \
-4 -> semana 5 \
+5 -> semana 5 \
 8 -> semana 6 \
 ... -> ...
 

@@ -20,6 +20,13 @@ Actualmente la biblioteca necesita una forma consistente de registrar préstamos
 9. El pago total de la multa pendiente habilita nuevamente al lector para solicitar préstamos.
 10. Cada libro conserva un historial de préstamos realizados.
 11. Cada lector se identifica con un documento oficial; cédula o DNI.
+12. Para este MVP no existe un catálogo maestro de libros como fuente de validación bibliográfica.
+13. La fuente operativa de verdad para consultar disponibilidad es el historial de préstamos del libro.
+14. La disponibilidad de un libro se deriva del último estado conocido en su historial.
+15. Los estados disponibles del préstamo son: `ON_LOAN` y `RETURNED`.
+16. Si un libro no muestra historial de préstamo, se interpreta como sin préstamos previos y operativo para préstamo.
+17. En historias, pruebas y UI no debe afirmarse que el libro "n"o existe en la biblioteca"; el mensaje correcto sería "no registra historial de préstamo" o "no tiene préstamo activo", según corresponda.
+18. Si existe conflicto entre historias, subtareas o decisiones de implementación y este PRD, prevalece el PRD.
 
 ### Sistema Fibonacci
 1. El retraso empieza a contarse desde el día siguiente a la fecha límite de devolución.

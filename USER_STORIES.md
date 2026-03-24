@@ -16,7 +16,7 @@
 - Regla 10: Cada libro conserva un historial de préstamos realizados.
 
 ## Dependencias
-- Requiere que existe información base del libro y sus préstamos
+- Requiere historial de préstamos consultable por identificador del libro.
 
 ## Story Points
 - 3 puntos
@@ -27,7 +27,7 @@
 - El bibliotecario puede consultar un libro usando un dato identificador.
 - El sistema indica si el libro está disponible o si tiene un préstamo activo.
 - El sistema muestra información suficiente para interpretar el estado del libro.
-- Si el libro no existe, el sistema lo muestra sin ambigüedad.
+- Si el libro no registra historial de préstamo, el sistema informa esa condición sin tratarla como inexistencia bibliográfica.
 
 **Gherkin**:
 ```gherkin
@@ -37,10 +37,18 @@
     Then el sistema muestra que el libro está disponible
 ```
 ```gherkin
-    Scenario: Consultar un libro inexistente
-    Given no existe un libro con el identificador consultado
+    Scenario: Consultar un libro sin historial de préstamo
+    Given el libro consultado no registra préstamos previos en el historial
     When el bibliotecario realiza la búsqueda
-    Then el sistema informa que el libro no fue encontrado
+    Then el sistema informa que el libro no registra historial de préstamo
+    And lo considera disponible para préstamo
+```
+```gherkin
+    Scenario: Consultar un libro con préstamo activo
+    Given existe un libro con último estado ON_LOAN en su historial
+    When el bibliotecario consulta ese libro
+    Then el sistema muestra que el libro no está disponible
+    And muestra que tiene un préstamo activo
 ```
 
 ## Justificación de criterios INVEST - HU-01
