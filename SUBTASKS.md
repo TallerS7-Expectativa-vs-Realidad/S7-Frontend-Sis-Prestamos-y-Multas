@@ -430,10 +430,10 @@ Una vez hecha la modificación en la DB se devuelve la respuesta 200
 ### Subtareas QA
 - TQA03-01: Diseñar validaciones para confirmar el cierre de un préstamo a tiempo sin generación de deuda.
 - TQA03-02: Diseñar escenarios para devolución en la fecha límite, devolución antes de la fecha limite y devolución sobre préstamo no activo.
-- TQA03-04: Preparar datos con al menos un préstamo vigente, un libro asociado y casos de fecha exacta y fecha anticipada.
-- TQA03-05: Validar que el sistema cierre correctamente el préstamo, no genere multa y deje el libro disponible para futuros préstamos.
-- TQA03-06: Validar alternos como devolución duplicada, error en identificación del préstamo o cambio incorrecto del estado del libro.
-- TQA03-07: Registrar evidencia del resultado esperado y obtenido para cada escenario, y documentar defectos si aparecen inconsistencias.
+- TQA03-03: Preparar datos con al menos un préstamo vigente, un libro asociado y casos de fecha exacta y fecha anticipada.
+- TQA03-04: Validar que el sistema cierre correctamente el préstamo, no genere multa y deje el libro disponible para futuros préstamos.
+- TQA03-05: Validar alternos como devolución duplicada, error en identificación del préstamo o cambio incorrecto del estado del libro.
+- TQA03-06: Registrar evidencia del resultado esperado y obtenido para cada escenario, y documentar defectos si aparecen inconsistencias.
 
 
 **Riesgo o notas de calidad**
