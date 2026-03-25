@@ -19,7 +19,7 @@ Debe haber:
 
 ---
 
-#### TDEV01-02: Exponer un endpoint GET api/v1/loan/{name} que reciba el identificador del libro a buscar y devuelva el contexto mínimo necesario del libro en concreto. (ID, nombre, disponibilidad)
+#### TDEV01-02: Exponer un endpoint GET api/v1/loans/{name} que reciba el identificador del libro a buscar y devuelva el contexto mínimo necesario del libro en concreto. (ID, nombre, disponibilidad)
 
 La ruta debe recibir name como parámetro \
 El name será el nombre del libro
@@ -63,9 +63,9 @@ Tabla de la DB llamada loan_books que contiene los siguientes atributos:
     - title : string (Título del libro)
     - state: string (Estado del libro: RETURNED o ON_LOAN)
     - type_id_reader: string (tipo de identificador de lector: DNI o CEDULA)
-    - Id_reader : integer (Identificador del lector)
+    - id_reader : integer (Identificador del lector)
     - name_reader : string (Nombre del lector responsable)
-    - date_limite : Date (Fecha límite del préstamo)
+    - date_limit : Date (Fecha límite del préstamo)
     - date_return : Date (Fecha de devolución)
 
 ---
@@ -136,7 +136,7 @@ se toma la fecha actual y se aumenta la cantidad de días en la cantidad de día
 Por ejemplo: si tomamos prestado el libro por 7 días \
 01/01/2026 => 08/01/2026
 
-#### TDEV02-03:- Exponer endpoint POST api/v1/loan para registrar un préstamo.
+#### TDEV02-03:- Exponer endpoint POST  api/v1/loanspara registrar un préstamo.
 
 Request Body recivido:
 { \
@@ -174,7 +174,7 @@ Respuestas posibles:
 
 --- 
 
-#### TDEV02-04: Integrar UI y endpoint POST api/v1/loan
+#### TDEV02-04: Integrar UI y endpoint POST api/v1/loans
 
 Si devuelve:
 201 => 
@@ -194,9 +194,9 @@ Tabla de la DB llamada dept_reader que contiene los siguientes atributos:
 - id_dept : integer (id de la multa) (único y autoincremental)
 - loan_id : integer (ID del préstamo) (clave foranea)
 - type_id_reader : string, (CEDULA o DNI)
-- Id_reader : integer (Identificador del lector)
+- id_reader : integer (Identificador del lector)
 - name_reader : string (Nombre del lector responsable)
-- amount_dept : real (monto de la deuda)
+- amount_debt : real (monto de la deuda)
 - state_dept : string (estado de la deuda: PENDING o PAID)
 
 ---
@@ -241,9 +241,9 @@ Tabla de la DB llamada loan_books que contiene los siguientes atributos:
     - title : string (Título del libro)
     - state: string (Estado del libro: RETURNED o ON_LOAN)
     - type_id_reader: string (tipo de identificador de lector: DNI o CEDULA)
-    - Id_reader : integer (Identificador del lector)
+    - id_reader : integer (Identificador del lector)
     - name_reader : string (Nombre del lector responsable)
-    - date_limite : Date (Fecha límite del préstamo)
+    - date_limit : Date (Fecha límite del préstamo)
     - date_return : Date (Fecha de devolución)
 
 ---
@@ -270,9 +270,9 @@ Si todas las comprobaciones pasan, entonces se guarda en la tabla "loan_books" l
     - title : string (obtenido del body del endpoint)
     - state: string (puesto en ON_LOAN)
     - type_id_reader: string (obtenido del body del endpoint)
-    - Id_reader : integer (obtenido del body del endpoint)
+    - id_reader : integer (obtenido del body del endpoint)
     - name_reader : string (obtenido del body del endpoint)
-    - date_limite : Date (generado en la funcionlidad)
+    - date_limit : Date (generado en la funcionlidad)
     - date_return : Date (NULL porque aún no se devolvió)
 
 
@@ -320,7 +320,7 @@ Se debe controlar bien la combinación de campos vacíos.
 
 ---
 
-#### TDEV03-02: Endpoint PATCH api/v1/loan con la información actualizada del libro
+#### TDEV03-02: Endpoint PATCH api/v1/loans con la información actualizada del libro
 
 Body del endpoint: \
 { \
@@ -328,7 +328,7 @@ Body del endpoint: \
   "name_reader" : string (puede ser null) \
   "id_book" : integer (puede ser null) \
   "type_id_reader" : string (Opciones: DNI o CEDULA) \
-  "Id_reader" : integer (puede ser null) \
+  "id_reader" : integer (puede ser null) \
 }
  
 Respuestas posibles:
@@ -358,7 +358,7 @@ Respuestas posibles:
 
 ---
 
-#### TDEV03-03: Comunicación UI con endpoint PATCH api/v1/loan
+#### TDEV03-03: Comunicación UI con endpoint PATCH api/v1/loans
 
 Si devuelve: \
 200 => 
@@ -380,9 +380,9 @@ Tabla de la DB llamada loan_books que contiene los siguientes atributos: \
     - title : string (Título del libro) \
     - state: string (Estado del libro: RETURNED o ON_LOAN) \
     - type_id_reader: string (tipo de identificador de lector: DNI o CEDULA) \
-    - Id_reader : integer (Identificador del lector) \
+    - id_reader : integer (Identificador del lector) \
     - name_reader : string (Nombre del lector responsable) \
-    - date_limite : Date (Fecha límite del préstamo) \
+    - date_limit : Date (Fecha límite del préstamo) \
     - date_return : Date (Fecha de devolución) \
 
 ---
@@ -395,7 +395,7 @@ Para esto busca en la tabla:
 - la tupla que tenga el "id_book" = id_book_recibida
 - que la tupla sea la más actual según la fecha "date_return"
  
-Y se devuelve el "loan_id", el "date_limite", "name_reader", "id_reader" de la tupla recuperada.
+Y se devuelve el "loan_id", el "date_limit", "name_reader", "id_reader" de la tupla recuperada.
 
 Si el state es RETURNED, entonces se devuelve código 409. En caso contrario se continúa con el proceso
 
@@ -407,9 +407,9 @@ Funcionalidad para evaluar que el tiempo de préstamo esté dentro del tiempo es
 
 se necesita que:
 - el servicio obtiene la fecha actual
-- se obtuviera el "date_limite" de la consulta a la DB
+- se obtuviera el "date_limit" de la consulta a la DB
 
-Se calcula la diferencia de tiempo entre "date_limite" y "fecha actual". \
+Se calcula la diferencia de tiempo entre "date_limit" y "fecha actual". \
 Si el resultado es 0 o un número negativo de días, entonces significa que está dentro del tiempo estipulado. \
 Si es superior a 0 días entonces está fuera del tiempo
 
@@ -477,7 +477,7 @@ Se debe controlar bien la combinación de campos vacíos.
 
 ---
 
-#### TDEV04-02: Endpoint PATCH api/v1/loan con la información actualizada del libro
+#### TDEV04-02: Endpoint PATCH api/v1/loans con la información actualizada del libro
 
 Body del endpoint: \
 { \
@@ -485,7 +485,7 @@ Body del endpoint: \
   "name_reader" : string (puede ser null) \
   "id_book" : integer (puede ser null) \
   "type_id_reader" : string (Opciones: DNI o CEDULA) \
-  "Id_reader" : integer (puede ser null) \
+  "id_reader" : integer (puede ser null) \
 }
 
 Respuestas posibles:
@@ -515,7 +515,7 @@ Respuestas posibles:
 
 ---
 
-#### TDEV04-03: Comunicación UI con endpoint PATCH api/v1/loan
+#### TDEV04-03: Comunicación UI con endpoint PATCH api/v1/loans
 
 Si devuelve:
 200 => 
@@ -537,9 +537,9 @@ Tabla de la DB llamada loan_books que contiene los siguientes atributos:
     - title : string (Título del libro)
     - state: string (Estado del libro: RETURNED o ON_LOAN)
     - type_id_reader: string (tipo de identificador de lector: DNI o CEDULA)
-    - Id_reader : integer (Identificador del lector)
+    - id_reader : integer (Identificador del lector)
     - name_reader : string (Nombre del lector responsable)
-    - date_limite : Date (Fecha límite del préstamo)
+    - date_limit : Date (Fecha límite del préstamo)
     - date_return : Date (Fecha de devolución)
 
 ---
@@ -552,7 +552,7 @@ Para esto busca en la tabla:
 - la tupla que tenga el "id_book" = id_book_recibida
 - que la tupla sea la más actual según la fecha "date_return"
 
-Y se devuelve el "loan_id", el "date_limite", "name_reader", "id_reader" de la tupla recuperada.
+Y se devuelve el "loan_id", el "date_limit", "name_reader", "id_reader" de la tupla recuperada.
 
 Si el state es RETURNED, entonces se devuelve código 409. En caso contrario se continúa con el proceso
 
@@ -564,9 +564,9 @@ Funcionalidad para evaluar que el tiempo de préstamo esté dentro del tiempo es
 
 se necesita que:
 - el servicio obtiene la fecha actual
-- se obtuviera el "date_limite" de la consulta a la DB
+- se obtuviera el "date_limit" de la consulta a la DB
 
-Se calcula la diferencia de tiempo entre "date_limite" y "fecha actual". \
+Se calcula la diferencia de tiempo entre "date_limit" y "fecha actual". \
 Si el resultado es 0 o un número negativo de días, entonces significa que está dentro del tiempo estipulado. \
 Si es superior a 0 días entonces está fuera del tiempo
 
@@ -629,9 +629,9 @@ Tabla de la DB llamada dept_reader que contiene los siguientes atributos:
     - id_dept : integer (id de la multa) (único y autoincremental)
     - loan_id : integer (ID del préstamo) (clave foranea)
     - type_id_reader : string, (CEDULA o DNI)
-    - Id_reader : integer (Identificador del lector)
+    - id_reader : integer (Identificador del lector)
     - name_reader : string (Nombre del lector responsable)
-    - amount_dept : real (monto de la deuda)
+    - amount_debt : real (monto de la deuda)
     - state_dept : string (estado de la deuda: PENDING o PAID)
 
 ---
@@ -640,7 +640,7 @@ Tabla de la DB llamada dept_reader que contiene los siguientes atributos:
 
 - si el tiempo de demora es > 0, entonces se debe generar una multa.
 - se requiere "loan_id", "id_reader", "name_reader" obtenidos de la lectura del préstamo en la DB  
-- se utiliza el monto de la multa en la funcionalidad para almacenarlo en "amount_dept"
+- se utiliza el monto de la multa en la funcionalidad para almacenarlo en "amount_debt"
 - se establece el "state_dept" como "PENDING"
 - la DB debe generar la "id_dept" automática
 
@@ -649,7 +649,7 @@ Si se cuenta con toda esta información, entonces se guarda en la DB la siguient
     - loan_id : integer (ID del préstamo) (clave foranea)
     - id_reader : integer (Identificador del lector)
     - name_reader : string (Nombre del lector responsable)
-    - amount_dept : real (monto de la deuda)
+    - amount_debt : real (monto de la deuda)
     - state_dept : string (estado de la deuda: PENDING o PAID)
                                             
 ### Subtareas QA
@@ -682,7 +682,7 @@ Elementos importantes:
     - tipo de identificador del lector (type_id_reader)
     - identificador del lector (id_reader)
     - nombre del lector (name_reader)
-    - fecha límite del préstamo (date_limite)
+    - fecha límite del préstamo (date_limit)
 
 
 - Esta tabla debe cargar los datos al mostrarse la pantalla
@@ -694,7 +694,7 @@ Elementos importantes:
 
 ---
 
-#### TDEV05-02: Endpoint GET api/v1/loan/outTime
+#### TDEV05-02: Endpoint GET api/v1/loans/outTime
 
 el endpoint no recibe parámetros, solo tiene una tarea no configurable. Traer todos los préstamos con fechas límites excedidas en orden alfabético según el título del libro
 
@@ -710,7 +710,7 @@ Respuestas posibles:
       "type_id_reader" : string (CEDULA o DNI)  \
       "id_reader": integer, \
       "name_reader": string, \
-      "date_limite": date, \
+      "date_limit": date, \
       "exceeded_days": integer, \
     }, \
     {...} \
@@ -728,7 +728,7 @@ Los valores devueltos son:  \
 "type_id_reader" => tipo de identificador del lector \
 "id_reader" => identificador del lector \
 "name_reader" => nombre del lector \
-"date_limite" => fecha límite de devolución \
+"date_limit" => fecha límite de devolución \
 "exceeded_days" => días excedidos de préstamo
 
 
@@ -753,9 +753,9 @@ Tabla de la DB llamada loan_books que contiene los siguientes atributos:
 - title : string (Título del libro)
 - state: string (Estado del libro: AVAILABLE o ON_LOAN)
 - type_id_reader: string (tipo de identificador de lector: DNI o CEDULA)
-- Id_reader : integer (Identificador del lector)
+- id_reader : integer (Identificador del lector)
 - name_reader : string (Nombre del lector responsable)
-- date_limite : Date (Fecha límite del préstamo)
+- date_limit : Date (Fecha límite del préstamo)
 - date_return : Date (Fecha de devolución)
 
 ---
@@ -786,9 +786,9 @@ Funcionalidad para evaluar que el tiempo de préstamo esté dentro del tiempo es
 
 se necesita que:
 - el servicio obtiene la fecha actual
-- se obtuviera el "date_limite" de la consulta a la DB
+- se obtuviera el "date_limit" de la consulta a la DB
 
-Se calcula la diferencia de tiempo entre "date_limite" y "fecha actual".
+Se calcula la diferencia de tiempo entre "date_limit" y "fecha actual".
 
 debe ser superior a 0, de otra forma, significa que hay un error en la recuperación de la información
 
@@ -896,9 +896,9 @@ Tabla de la DB llamada dept_reader que contiene los siguientes atributos:
     - id_dept : integer (id de la multa) (único y autoincremental)
     - loan_id : integer (ID del préstamo) (clave foranea)
     - type_id_reader : string, (CEDULA o DNI)
-    - Id_reader : integer (Identificador del lector)
+    - id_reader : integer (Identificador del lector)
     - name_reader : string (Nombre del lector responsable)
-    - amount_dept : real (monto de la deuda)
+    - amount_debt : real (monto de la deuda)
     - state_dept : string (estado de la deuda: PENDING o PAID)
 
 ---
@@ -930,7 +930,7 @@ pasándole como parámetro en identificador el "id_dept" de la multa
 
 ---
 
-#### TDEV06-07: Endpoint PATCH api/v1/debt/{identificador} para cambiar el estado de la multa a pagado
+#### TDEV06-07: Endpoint PATCH api/v1/debts/{identificador} para cambiar el estado de la multa a pagado
 
 Endpoint encargado de editar  el estado de la multa cuando se confirma el pago de esta. Permitiendo que el lector pueda volver a tomar prestado un libro
 
@@ -948,7 +948,7 @@ Respuestas posibles:
   "type_id_reader": string, (CEDULA o DNI)
   "id_reader" : integer,
   "name_reader": string,
-  "amount_dept": real,
+  "amount_debt": real,
   "state" : string (debería devolver PAID si todo sale bien)
 }
 
@@ -961,7 +961,7 @@ Respuestas posibles:
 
 ---
 
-#### TDEV06-08: Comunicación UI y endpoint PATCH api/v1/debt/{identificador}
+#### TDEV06-08: Comunicación UI y endpoint PATCH api/v1/debts/{identificador}
 
 Si devuelve:
 200 => 
