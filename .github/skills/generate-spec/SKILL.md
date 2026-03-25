@@ -53,3 +53,4 @@ related-specs: []
 
 - Solo leer + crear. No modificar código existente.
 - Status siempre `DRAFT`. El usuario aprueba antes de implementar.
+- No propagar `dept_reader`, `state_dept`, `amount_dept` ni mensajes de "libro inexistente" si solo falta historial.

@@ -3,7 +3,7 @@ id: SPEC-005
 status: APPROVED
 feature: hu-05-consultar-prestamos-vencidos-y-lector
 created: 2026-03-24
-updated: 2026-03-24
+updated: 2026-03-25
 author: spec-generator
 version: "1.0"
 related-specs: [sistema-de-prestamos-y-multas]
@@ -39,20 +39,21 @@ Scenario: Consultar préstamos vencidos
 ### Reglas de Negocio
 - Excluir préstamos con `state=RETURNED`.
 - Considerar vencidos los registros cuya `date_limit < today` y `state=ON_LOAN`.
+- La salida mínima debe incluir también el estado operativo del libro.
+- Esta consulta no incluye filtros avanzados, ordenamiento configurable ni paginación en el MVP.
 
 ---
 
 ## 2. DISEÑO
 
 ### Endpoint
-GET /api/v1/loans/overdue
+GET /api/v1/loans/outTime
 - Auth: sí
-- Query params: optional `limit`, `since`
-- Response 200: list of `{ loan_id, id_book, title, id_reader, name_reader, date_limit, date_return (null) }`
+- Response 200: list of `{ loan_id, id_book, title, state, id_reader, name_reader, date_limit, date_return }`
 
 ### Frontend
-- Page: `OverduePage` (`/loans/overdue`) con tabla simple.
-- Hook: `useLoan.getOverdue()` → `GET /api/v1/loans/overdue`.
+- Page: `OverduePage` (`/loans/outTime`) con tabla simple.
+- Hook: `useLoan.getOverdue()` → `GET /api/v1/loans/outTime`.
 
 ---
 
@@ -67,4 +68,4 @@ GET /api/v1/loans/overdue
 
 ### QA
 - [ ] Fixtures: varios préstamos, algunos vencidos y algunos no.
-- [ ] Verificar que solo aparezcan vencidos y que la salida coincida con PRD.
+- [ ] Verificar que solo aparezcan vencidos y que la salida incluya libro, lector responsable y estado operativo.

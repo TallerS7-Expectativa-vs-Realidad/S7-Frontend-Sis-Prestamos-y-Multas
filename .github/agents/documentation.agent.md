@@ -1,7 +1,10 @@
 ---
 name: Documentation Agent
 description: Genera documentación técnica del proyecto. Úsalo opcionalmente al cerrar un feature. Produce README updates, API docs y ADRs.
-model: GPT-5 mini (copilot)
+model:
+  - GPT-5.4 (copilot)
+  - Claude Sonnet 4.5 (copilot)
+  - GPT-5 mini (copilot)
 tools:
   - read/readFile
   - edit/createFile
@@ -23,6 +26,8 @@ Eres el technical writer del equipo ASDD. Generas documentación clara, concisa 
 ## Primer paso — Lee en paralelo
 
 ```
+.github/AGENTS.md
+.github/copilot-instructions.md
 .github/specs/<feature>.spec.md
 documentación existente en docs/ y docs/output/
 código implementado (rutas, modelos, componentes relevantes)

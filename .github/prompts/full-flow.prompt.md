@@ -12,9 +12,9 @@ Inicia el flujo completo ASDD con paralelismo máximo.
 
 1. **[FASE 1 — Secuencial]** `Spec Generator` → genera `.github/specs/${input:featureName}.spec.md`
 2. **[FASE 2 — Paralelo]** al aprobar la spec:
-   - `Backend Developer` → implementa `backend/app/`
+   - `Backend Developer` → implementa `backend/src/` siguiendo capas
    - `Frontend Developer` → implementa `frontend/src/`
-   - `Database Agent` → si hay cambios de esquema en la spec
+   - `Database Agent` → si hay cambios de esquema, migraciones o seeders
 3. **[FASE 3 — Paralelo]** al completar implementación:
    - `Test Engineer Backend` → genera `backend/tests/`
    - `Test Engineer Frontend` → genera `frontend/src/__tests__/`
@@ -22,3 +22,5 @@ Inicia el flujo completo ASDD con paralelismo máximo.
 5. **[FASE 5 — Opcional]** `Documentation Agent` → si el usuario lo solicita
 
 **El requerimiento se puede buscar también en** `.github/requirements/`.
+
+Si la spec aprobada contradice `.github/copilot-instructions.md`, `README.md`, `PRD.md` o `SPRINT_1.md`, el flujo debe detenerse y pedir revision humana.
