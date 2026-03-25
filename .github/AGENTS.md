@@ -19,7 +19,7 @@ spec-generator    → /generate-spec      → .github/specs/<feature>.spec.md
 
 [FASE 2 — Paralelo ∥]
 database-agent    → modelos, migrations, seeders  (si hay cambios de DB)
-backend-developer → capas del proyecto (routes/services/repos/models)
+backend-developer → capas del proyecto (controllers/services/repos/models)
 frontend-developer→ páginas / componentes / hooks / servicios
 
 [FASE 3 — Paralelo ∥]
@@ -65,7 +65,7 @@ Los agentes deben cargar estos archivos como **primer paso** antes de generar cu
 | Reglas de Oro | `.github/AGENTS.md` | Todos (siempre activas) |
 | Definition of Done | `.github/copilot-instructions.md` | Test Engineer Backend, Test Engineer Frontend, QA Agent, Orchestrator |
 | Definition of Ready | `.github/copilot-instructions.md` | Spec Generator, Orchestrator |
-| Stack y restricciones | `.github/instructions/backend.instructions.md` | Backend Developer, Frontend Developer, Database Agent, Spec Generator |
+| Stack y restricciones | `.github/instructions/backend.instructions.md` | Backend Developer, Frontend Developer, Database Agent |
 | Arquitectura | `.github/instructions/backend.instructions.md` | Backend Developer, Frontend Developer, Spec Generator |
 
 ---

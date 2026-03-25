@@ -1,60 +1,72 @@
 ---
-applyTo: "backend/**/*.py"
+applyTo: "backend/**"
 ---
 
-> **Scope**: Se aplica a proyectos con capa backend. Si el proyecto usa un lenguaje o estructura diferente, adaptar la sección de convenciones y wiring al stack real definido en esta misma instrucción.
+> **Scope**: Se aplica a proyectos con capa backend. Esta versión está adaptada al stack Node.js + Express + PostgreSQL.
 
-# Instrucciones para Archivos de Backend (Python/FastAPI)
+# Instrucciones para Archivos de Backend (Node.js / Express / PostgreSQL)
 
 ## Arquitectura en Capas
 
-Siempre sigue la arquitectura en capas del proyecto:
+Sigue la arquitectura en capas del proyecto:
 
 ```
-routes → services → repositories → MongoDB
+controllers/routes → services → repositories → database (Postgres via `pg`)
 ```
 
-- **`app/routes/`**: Solo parsear HTTP + instanciar dependencias + delegar al service.
-- **`app/services/`**: Solo lógica de negocio. Recibe repository por constructor.
-- **`app/repositories/`**: Único lugar con acceso a MongoDB via Motor.
-- **`app/models/`**: Solo Pydantic schemas (no documentos DB).
+- **`src/routes/` o `src/controllers/`**: Parseo HTTP, validación de request, instanciación de dependencias (factories) y delegación al service.
+- **`src/services/`**: Lógica de negocio pura — orquesta repositorios y reglas de negocio.
+- **`src/repositories/`**: Acceso a la base de datos — queries SQL o a través de un query builder (`pg`, `knex`, TypeORM/Objection según el proyecto).
+- **`src/models/`**: DTOs, validaciones (Zod/Joi) o tipos/Interfaces (TypeScript).
 
-## Wiring de Dependencias (patrón obligatorio en routers)
+## Wiring de Dependencias (patrón recomendado en Express)
 
-```python
-# ✅ Correcto — Depends() en la firma del endpoint
-@router.post("/")
-async def create_item(body: ItemCreate, db=Depends(get_db)):
-    repo = ItemRepository(db)
-    service = ItemService(repo)
-    return await service.create(body)
+En Express se recomienda crear factories que inyecten dependencias cuando se construyen routers:
+
+```js
+// src/routes/featureRoutes.js
+module.exports = function makeFeatureRouter({ featureService }) {
+  const router = require('express').Router();
+  router.post('/', async (req, res, next) => {
+    try {
+      const result = await featureService.create(req.body, req.user);
+      res.status(201).json(result);
+    } catch (err) { next(err); }
+  });
+  return router;
+}
 ```
 
-NUNCA inyectar `get_db()` directamente como `db = get_db()` fuera de `Depends()`.
-NUNCA instanciar repositorios o servicios fuera del router.
+Registrar en el punto de entrada montando el router con las dependencias:
+
+```js
+const app = express();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const repo = new FeatureRepository(pool);
+const service = new FeatureService(repo);
+app.use('/api/v1/features', makeFeatureRouter({ featureService: service }));
+```
 
 ## Convenciones de Código
 
-- Todas las funciones que tocan la DB son `async def`.
-- Nombres en `snake_case` para funciones y variables.
-- Los endpoints FastAPI siempre tienen response model explícito o retornan dict serializable.
-- Usar `uid` de Firebase como clave única en MongoDB.
-- Importar configuración siempre desde `app.config.settings` o `app.config.database`.
+- Todas las operaciones a DB deben usar `async/await`.
+- Nombres en `camelCase` para JS/TS; `PascalCase` para clases y componentes.
+- Variables de entorno vía `dotenv` y prefijadas cuando aplique.
+- Manejo de errores centralizado con middleware de Express.
 
 ## Nuevas Rutas / Controladores
 
 Para agregar un nuevo endpoint:
-1. Crear el archivo del router/controlador en la capa de entrada del proyecto
-2. Registrar el router/controlador en el punto de montaje principal de la aplicación
-3. Seguir el patrón de wiring de dependencias definido en la sección anterior
-
-> Ver `README.md` para la estructura de carpetas específica del proyecto.
+1. Crear el router/controller en `src/routes/` o `src/controllers/`.
+2. Implementar repositorio en `src/repositories/` que use `pg`/query builder.
+3. Implementar servicio en `src/services/` que reciba el repo.
+4. Registrar el router en `src/app.js` o `src/index.js` donde se montan rutas.
 
 ## Nunca hacer
 
-- Inyectar la fuente de datos directamente en servicios o modelos (solo en la capa de entrada).
-- Lógica de negocio en los routers.
-- Operaciones MongoDB síncronas (siempre `await`).
+- Acceder a la base de datos directamente desde controladores sin pasar por repositorios.
+- Incluir secrets en el repo — usar `process.env` y `dotenv`.
+- Mezclar lógica de negocio en rutas HTTP.
 
 ---
 

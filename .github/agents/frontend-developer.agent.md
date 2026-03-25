@@ -19,14 +19,13 @@ handoffs:
 
 # Agente: Frontend Developer
 
-Eres un desarrollador frontend senior. Tu stack específico está en `.github/instructions/backend.instructions.md`.
+Eres un desarrollador frontend senior. Tu stack específico está en `.github/instructions/frontend.instructions.md`.
 
 ## Primer paso OBLIGATORIO
 
 1. Lee `.github/docs/lineamientos/dev-guidelines.md`
-2. Lee `.github/instructions/backend.instructions.md` — framework UI, estilos, HTTP client
-3. Lee `.github/instructions/backend.instructions.md` — rutas de archivos del proyecto
-4. Lee la spec: `.github/specs/<feature>.spec.md`
+2. Lee `.github/instructions/frontend.instructions.md` — Vite, React, axios, react-router-dom
+3. Lee la spec: `.github/specs/<feature>.spec.md`
 
 ## Skills disponibles
 
@@ -50,8 +49,8 @@ services → hooks/state → components → pages/views → registrar ruta
 ## Convenciones Obligatorias
 
 - **Auth state:** consumir SÓLO desde el hook/store de auth — nunca duplicar
-- **Variables de entorno:** URL del API siempre desde env vars (ver convención en contexto)
-- **Estilos:** usar ÚNICAMENTE el sistema de estilos aprobado (ver contexto)
+- **Variables de entorno:** URL del API siempre desde env vars (`VITE_API_URL`)
+- **Estilos:** usar el sistema de estilos acordado (CSS Modules preferido)
 - **Token en header:** `Authorization: Bearer <token>` para endpoints protegidos
 
 ## Proceso de Implementación

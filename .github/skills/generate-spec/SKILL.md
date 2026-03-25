@@ -11,10 +11,10 @@ argument-hint: "<nombre-feature>: <descripción del requerimiento>"
 Una historia puede generar spec solo si cumple:
 
 - [ ] Estructura **Como / Quiero / Para que** completa
-- [ ] Términos canónicos del dominio (ver `CLAUDE.md` / `copilot-instructions.md` → Diccionario de Dominio)
+- [ ] Términos canónicos del dominio (ver `copilot-instructions.md` → Diccionario de Dominio)
 - [ ] Criterios BDD: **Dado / Cuando / Entonces** (feliz + validaciones + errores)
 - [ ] Contrato API explícito si aplica (método, ruta `/api/v1/...`, request, response, códigos HTTP)
-- [ ] Alineada con arquitectura y stack (FastAPI + MongoDB + React + Firebase)
+- [ ] Alineada con arquitectura y stack (Node.js + Express + PostgreSQL + React)
 - [ ] Dependencias y riesgos identificados
 
 Si el requerimiento no cumple el DoR → listar las preguntas pendientes antes de generar.

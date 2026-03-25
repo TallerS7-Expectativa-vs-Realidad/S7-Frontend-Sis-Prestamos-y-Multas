@@ -13,25 +13,22 @@ argument-hint: "<nombre-feature>"
 
 ## Orden de implementación
 ```
-models → repositories → services → routes → registrar en punto de entrada
+models/types → repositories → services → controllers/routes → registrar en punto de entrada
 ```
 
 | Capa | Responsabilidad |
 |------|-----------------|
-| **Models / Schemas** | Validación de tipos e input/output (Create, Update, Response, Document) |
-| **Repositories** | Acceso a DB — queries CRUD sin lógica de negocio |
+| **Models / Types** | DTOs y validaciones (Zod/Joi o TypeScript types) |
+| **Repositories** | Acceso a DB — queries CRUD con `pg` o query builder |
 | **Services** | Lógica de negocio pura — orquesta repositorios |
-| **Routes / Controllers** | Parsing HTTP + DI + delegar al service |
+| **Controllers / Routes** | Parsing HTTP + DI + delegar al service |
 
-## Patrón de DI (obligatorio en routes)
-- Inyectar dependencias en la firma del handler (no instanciar inline en el cuerpo)
-- El service recibe el repo por parámetro; el router instancia ambos
-
-Ver patrones específicos del stack en `.github/instructions/backend.instructions.md`.
+## Patrón de DI (recomendado en routes)
+- Construir routers mediante factories que reciben servicios/repositories como dependencias.
 
 ## Reglas
-Ver `.claude/rules/backend.md` — async, naming, errores, timestamps.
+- Seguir `.github/instructions/backend.instructions.md` para wiring, env vars (`dotenv`) y manejo de errores.
 
 ## Restricciones
 - Solo directorio de backend del proyecto. No tocar frontend.
-- No generar tests (responsabilidad de `test-engineer-backend`).
+- No generar tests (responsabilidad de `test-engineer-backend`), salvo mocks de ejemplo si se solicitan.

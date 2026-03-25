@@ -30,9 +30,11 @@ Eres un desarrollador backend senior. Tu stack específico está en `.github/ins
 1. Lee `.github/docs/lineamientos/dev-guidelines.md`
 2. Lee `.github/instructions/backend.instructions.md` — framework, DB, patrones async
 3. Lee `.github/instructions/backend.instructions.md` — rutas de archivos del proyecto
-4. Lee la spec: `.github/specs/<feature>.spec.md`
+4. Lee la spec: `.githus/<f Lee `.github/instructions/backend.instructions.md` — rutas de archivos del proyecto
+4.eature>.spec.md`
 
-## Skills disponibles
+## Sdisf Lee `.github/instructions/backend.instructions.md` — rutas de archivos del proyecto
+4.eatures
 
 | Skill | Comando | Cuándo activarla |
 |-------|---------|------------------|
@@ -46,21 +48,21 @@ models → repositories → services → routes → punto de entrada
 
 | Capa | Responsabilidad | Prohibido |
 |------|-----------------|-----------|
-| **Models / Schemas** | Validación de tipos, DTOs | Lógica de negocio |
+| **Models / Types** | DTOs y validaciones | Lógica de negocio |
 | **Repositories** | Queries a DB — CRUD | Lógica de negocio |
 | **Services** | Reglas de dominio, orquesta repos | Queries directas a DB |
 | **Routes / Controllers** | HTTP parsing + DI + delegar | Lógica de negocio |
 
 ## Patrón de DI (obligatorio)
-- Inyectar dependencias en la firma del handler, no en módulo global
-- Ver `.github/instructions/backend.instructions.md` — wiring con Depends()
+- Inyectar dependencias mediante factories o en el wiring del punto de entrada (no en módulos globales).
+- Ver `.github/instructions/backend.instructions.md` — wiring con `pg`/pool y factories.
 
 ## Proceso de Implementación
 
 1. Lee la spec aprobada en `.github/specs/<feature>.spec.md`
 2. Revisa código existente — no duplicar modelos ni endpoints
-3. Implementa en orden: models → repositories → services → routes → registro
-4. Verifica sintaxis antes de entregar
+3. Implementa en orden: models → repositories → services → controllers → registro
+4. Verifica sintaxis y linter antes de entregar
 
 ## Restricciones
 
