@@ -85,10 +85,10 @@ La información recuperada en esta funcionalidad es:
 
 
 ### Subtareas QA
-- TQA01-01: Diseñar escenarios para consulta de libro disponible, libro prestado y libro inexistente.
+- TQA01-01: Diseñar escenarios para consulta de libro disponible, libro prestado y libro sin historial.
 - TQA01-02: Preparar datos con al menos un libro disponible, uno prestado y uno con historial de préstamos más extenso.
 - TQA01-03: Validar que el sistema muestre correctamente el estado del libro, préstamo activo e historial básico.
-- TQA01-04: Validar alternos como libro inexistente, o libro con información histórica incompleta.
+- TQA01-04: Validar alternos como libro sin historial, o libro con información histórica incompleta.
 - TQA01-05: Validar que la consulta del libro distinga préstamos activos y préstamos cerrados dentro del historial.
 - TQA01-06: Registrar evidencia del resultado esperado y obtenido para cada escenario, y documentar defectos si aparecen inconsistencias.
 
@@ -136,7 +136,7 @@ se toma la fecha actual y se aumenta la cantidad de días en la cantidad de día
 Por ejemplo: si tomamos prestado el libro por 7 días \
 01/01/2026 => 08/01/2026
 
-#### TDEV02-03:- Exponer endpoint POST  api/v1/loanspara registrar un préstamo.
+#### TDEV02-03:- Exponer endpoint POST api/v1/loans para registrar un préstamo.
 
 Request Body recivido:
 { \
@@ -190,14 +190,14 @@ Si devuelve:
 
 #### TDEV02-05: Tabla DB con lectores morosos.
 
-Tabla de la DB llamada dept_reader que contiene los siguientes atributos:
-- id_dept : integer (id de la multa) (único y autoincremental)
+Tabla de la DB llamada debt_reader que contiene los siguientes atributos:
+- id_debt : integer (id de la multa) (único y autoincremental)
 - loan_id : integer (ID del préstamo) (clave foranea)
 - type_id_reader : string, (CEDULA o DNI)
 - id_reader : integer (Identificador del lector)
 - name_reader : string (Nombre del lector responsable)
 - amount_debt : real (monto de la deuda)
-- state_dept : string (estado de la deuda: PENDING o PAID)
+- state_debt : string (estado de la deuda: PENDING o PAID)
 
 ---
 
@@ -209,12 +209,12 @@ Para esto busca en la tabla:
  - la tupla que tenga la "id_reader" = id_reader_recibida
  - que la tupla sea la más actual
  
-Y se devuelve el state_dept de la tupla recuperada.
+Y se devuelve el state_debt de la tupla recuperada.
 
 
 #### TDEV02-07: Verificación de morosidad del lector.
 
-si el state_dept es "PENDING" entonces se finaliza la carga del préstamo y el endpoint devuelve el código 409
+si el state_debt es "PENDING" entonces se finaliza la carga del préstamo y el endpoint devuelve el código 409
 
 ---
 
@@ -280,7 +280,7 @@ Si todas las comprobaciones pasan, entonces se guarda en la tabla "loan_books" l
 - TQA02-01: Diseñar escenarios para préstamos exitosos, libros ya prestados, lector con deuda pendiente y plazo no permitido.
 - TQA02-02: Preparar datos con al menos un libro disponible, uno prestado, un lector habilitado y un lector bloqueado por deuda.
 - TQA02-03: Validar que el sistema registre correctamente un préstamo cuando se cumplen todas las reglas del negocio.
-- TQA02-04: Validar alternos como libro inexistente, lector inexistente o error en el cálculo de la fecha de devolución.
+- TQA02-04: Validar alternos como libro sin historial, lector inexistente o error en el cálculo de la fecha de devolución.
 - TQA02-05: Registrar evidencia del resultado esperado y obtenido para cada escenario, y documentar defectos si aparecen inconsistencias.
 
 ### Riesgo o notas de calidad
@@ -625,14 +625,14 @@ Una vez hecha la modificación en la DB se devuelve la respuesta 200
 
 #### TDEV04-09: Tabla DB con lectores morosos.
 
-Tabla de la DB llamada dept_reader que contiene los siguientes atributos:
-    - id_dept : integer (id de la multa) (único y autoincremental)
+Tabla de la DB llamada debt_reader que contiene los siguientes atributos:
+  - id_debt : integer (id de la multa) (único y autoincremental)
     - loan_id : integer (ID del préstamo) (clave foranea)
     - type_id_reader : string, (CEDULA o DNI)
     - id_reader : integer (Identificador del lector)
     - name_reader : string (Nombre del lector responsable)
     - amount_debt : real (monto de la deuda)
-    - state_dept : string (estado de la deuda: PENDING o PAID)
+  - state_debt : string (estado de la deuda: PENDING o PAID)
 
 ---
 
@@ -641,16 +641,16 @@ Tabla de la DB llamada dept_reader que contiene los siguientes atributos:
 - si el tiempo de demora es > 0, entonces se debe generar una multa.
 - se requiere "loan_id", "id_reader", "name_reader" obtenidos de la lectura del préstamo en la DB  
 - se utiliza el monto de la multa en la funcionalidad para almacenarlo en "amount_debt"
-- se establece el "state_dept" como "PENDING"
-- la DB debe generar la "id_dept" automática
+- se establece el "state_debt" como "PENDING"
+- la DB debe generar la "id_debt" automática
 
 Si se cuenta con toda esta información, entonces se guarda en la DB la siguiente información:
-   - id_dept : integer (id de la multa) (único y autoincremental)
+  - id_debt : integer (id de la multa) (único y autoincremental)
     - loan_id : integer (ID del préstamo) (clave foranea)
     - id_reader : integer (Identificador del lector)
     - name_reader : string (Nombre del lector responsable)
     - amount_debt : real (monto de la deuda)
-    - state_dept : string (estado de la deuda: PENDING o PAID)
+   - state_debt : string (estado de la deuda: PENDING o PAID)
                                             
 ### Subtareas QA
 - TQA04-01: Diseñar matriz de validación para retrasos de 1, 7, 8, 15 y 22 días.
@@ -679,10 +679,12 @@ Elementos importantes:
     - id de préstamo (loan_id) (no visible en la tabla)
     - id del libro (id_book)
     - nombre de libro (title)
+  - estado del préstamo (state)
     - tipo de identificador del lector (type_id_reader)
     - identificador del lector (id_reader)
     - nombre del lector (name_reader)
     - fecha límite del préstamo (date_limit)
+  - fecha de devolución (date_return)
 
 
 - Esta tabla debe cargar los datos al mostrarse la pantalla
@@ -706,12 +708,13 @@ Respuestas posibles:
     { \
       "loan_id": integer, \
       "id_book": integer, \
-      "title": stringv
+      "title": string, \
+      "state": string, \
       "type_id_reader" : string (CEDULA o DNI)  \
       "id_reader": integer, \
       "name_reader": string, \
       "date_limit": date, \
-      "exceeded_days": integer, \
+      "date_return": date | null \
     }, \
     {...} \
   ], \
@@ -729,7 +732,7 @@ Los valores devueltos son:  \
 "id_reader" => identificador del lector \
 "name_reader" => nombre del lector \
 "date_limit" => fecha límite de devolución \
-"exceeded_days" => días excedidos de préstamo
+"date_return" => fecha de devolución o null si el libro sigue prestado
 
 
 ---
@@ -751,7 +754,7 @@ Tabla de la DB llamada loan_books que contiene los siguientes atributos:
 - loan_id : integer (ID del préstamo) (único y autoincremental)
 - id_book : integer (Identificador del libro)
 - title : string (Título del libro)
-- state: string (Estado del libro: AVAILABLE o ON_LOAN)
+- state: string (Estado del libro: RETURNED o ON_LOAN)
 - type_id_reader: string (tipo de identificador de lector: DNI o CEDULA)
 - id_reader : integer (Identificador del lector)
 - name_reader : string (Nombre del lector responsable)
@@ -772,27 +775,28 @@ Debe recuperar:
 - la id del préstamo
 - la id del libro
 - el título del libro
+- el estado del préstamo
 - el tipo de identificador del lector
 - el identificador del lector
 - el nombre del lector
 - la fecha límite
+- la fecha de devolución
 
 
 ---
 
-#### TDEV05-06: Funcionalidad para calcular el tiempo de demora y evaluar cumplimiento de tiempo
+#### TDEV05-06: Funcionalidad para identificar préstamos fuera de plazo
 
-Funcionalidad para evaluar que el tiempo de préstamo esté dentro del tiempo estipulado
+Funcionalidad para evaluar que el préstamo esté vencido según la fecha límite.
 
 se necesita que:
-- el servicio obtiene la fecha actual
-- se obtuviera el "date_limit" de la consulta a la DB
+- el servicio obtenga la fecha actual
+- se obtenga el "date_limit" de la consulta a la DB
+- el estado del préstamo continúe en "ON_LOAN"
 
-Se calcula la diferencia de tiempo entre "date_limit" y "fecha actual".
+Se considera fuera de plazo si la fecha actual supera a "date_limit".
 
-debe ser superior a 0, de otra forma, significa que hay un error en la recuperación de la información
-
-Este valor será devuelto en el parámetro "exceeded_days" de la respuesta del endpoint
+Este criterio se usa para filtrar la respuesta del endpoint; no se expone un cálculo adicional fuera del contrato definido.
 
 
 ### Subtareas QA
@@ -840,7 +844,7 @@ el endpoint puede recibir 3 parámetros:
 - "name" : string 
 y
 - "id" : integer
-- "typeId : string (CEDULA o DNI)
+- "typeId" : string (CEDULA o DNI)
 
 si se incluye "id", entonces debe estar también "typeId"
 
@@ -852,17 +856,17 @@ Respuestas posibles:
 
 200 => \
 { \
-    "id_dept" : integer, \
-    "load_id" : integer, \
+  "id_debt" : integer, \
+  "loan_id" : integer, \
     "type_id_reader" : string, (CEDULA o DNI) \
     "id_reader" : integer, \
-    "name_reader" string, \
-    "amount" : real, \
-    "state_dept" : string (PENDING o PAID) \
+    "name_reader" : string, \
+  "amount_debt" : real, \
+  "state_debt" : string (PENDING o PAID) \
 }
 
 404 =>
-- si el lector no existe
+- si no existe deuda pendiente asociada a la búsqueda
 
 400 =>
 - si alguno de los campos obligatorios no es correcto
@@ -892,14 +896,14 @@ Si devuelve:
 
 #### TDEV06-04: Tabla DB con lectores morosos.
 
-Tabla de la DB llamada dept_reader que contiene los siguientes atributos:
-    - id_dept : integer (id de la multa) (único y autoincremental)
+Tabla de la DB llamada debt_reader que contiene los siguientes atributos:
+  - id_debt : integer (id de la multa) (único y autoincremental)
     - loan_id : integer (ID del préstamo) (clave foranea)
     - type_id_reader : string, (CEDULA o DNI)
     - id_reader : integer (Identificador del lector)
     - name_reader : string (Nombre del lector responsable)
     - amount_debt : real (monto de la deuda)
-    - state_dept : string (estado de la deuda: PENDING o PAID)
+  - state_debt : string (estado de la deuda: PENDING o PAID)
 
 ---
 
@@ -925,8 +929,8 @@ GET /api/v1/readers/debt?typeId=*tipo de id*&id=*identificador*&name=*nombre*
 El confirmar el pago de la multa debe tener una doble confirmación por seguridad y evitar errores.
 
 el botón de pago llama al endpoint:
-- Endpoint PATCH api/v1/debt/{identificador} para cambiar el estado de la multa a pagado
-pasándole como parámetro en identificador el "id_dept" de la multa
+- Endpoint PATCH api/v1/debts/{identificador} para cambiar el estado de la multa a pagado
+pasándole como parámetro en identificador el "id_debt" de la multa
 
 ---
 
@@ -938,24 +942,24 @@ el endpoint recibe la id de la multa como identificador en la url.
 
 Estructura del request Body:
 {
-    "state_dept" : "PAID"
+    "state_debt" : "PAID"
 }
 
 Respuestas posibles:
 {
-  "id_dept": integer,
+  "id_debt": integer,
   "loan_id": integer,
   "type_id_reader": string, (CEDULA o DNI)
   "id_reader" : integer,
   "name_reader": string,
   "amount_debt": real,
-  "state" : string (debería devolver PAID si todo sale bien)
+  "state_debt" : string (debería devolver PAID si todo sale bien)
 }
 
 404 =>
 - si no se encuentra la multa con el identificador dado
 409 =>
-- si la multa ya tiene el estado PENDING
+- si la multa ya tiene el estado PAID
 500 =>
 - Error interno del servidor. Se intenta devolver un mensaje de error que de información sobre el error resultante
 
