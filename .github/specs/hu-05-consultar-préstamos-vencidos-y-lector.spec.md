@@ -46,7 +46,6 @@ Scenario: Consultar préstamos vencidos
 
 ### Endpoint
 GET /api/v1/loans/overdue
-- Auth: sí
 - Query params: optional `limit`, `since`
 - Response 200: list of `{ loan_id, id_book, title, id_reader, name_reader, date_limit, date_return (null) }`
 

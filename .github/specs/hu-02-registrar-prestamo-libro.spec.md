@@ -3,9 +3,9 @@ id: SPEC-002
 status: APPROVED
 feature: hu-02-registrar-prestamo-libro
 created: 2026-03-24
-updated: 2026-03-24
+updated: 2026-03-25
 author: spec-generator
-version: "1.0"
+version: "1.1"
 related-specs: [sistema-de-prestamos-y-multas]
 ---
 
@@ -60,7 +60,6 @@ Scenario: Intentar prestar a un lector con deuda
 
 ### Endpoint
 POST /api/v1/loan
-- Auth: sí
 - Body: `{ id_book, title, type_id_reader, id_reader, name_reader, loan_days }`
 - Responses:
   - 201: Loan creado (ver formato)
@@ -75,15 +74,18 @@ POST /api/v1/loan
 
 ## 3. LISTA DE TAREAS
 
-### Backend
-- [ ] Validaciones `loan_days` y tipos de id.
-- [ ] `LoanRepository.insert_loan` y verificación de disponibilidad.
-- [ ] `DebtRepository.get_latest_by_reader` para validar bloqueo.
+### Backend ✅ COMPLETADO
+- [x] Validaciones `loan_days` y tipos de id. (Zod schema en `models/Loan.js`)
+- [x] `LoanRepository.insert_loan` y verificación de disponibilidad. (Implementado)
+- [x] `DebtRepository.get_latest_by_reader` para validar bloqueo. (Implementado)
+- [x] Servicio con lógica de negocio (LoanService: validación + orquestación)
+- [x] Rutas HTTP POST /api/v1/loan y GET /api/v1/loan/:name (loanRoutes.js)
+- [x] Auto-inicialización de base de datos (src/db/initialize.js)
 - [ ] Tests: creación éxito, libro no disponible, lector con deuda.
 
 ### Frontend
-- [ ] `LoanForm` + cálculo visual de fecha límite.
-- [ ] Manejo de errores 400/409/500.
+- [x] `LoanForm` + cálculo visual de fecha límite.
+- [x] Manejo de errores 400/409/500.
 
 ### QA
 - [ ] Datos: libro disponible, lector habilitado, lector con deuda.

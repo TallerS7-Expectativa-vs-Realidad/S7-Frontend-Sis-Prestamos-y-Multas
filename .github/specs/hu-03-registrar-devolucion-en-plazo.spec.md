@@ -54,7 +54,6 @@ Actualizar `loan_books`: set `date_return`, `state=RETURNED`, `updated_at`.
 
 ### Endpoint
 PATCH /api/v1/loan
-- Auth: sí
 - Body: `{ loan_id, date_return, type_id_reader, id_reader, name_reader }`
 - Responses:
   - 200: préstamo actualizado (RETURNED)
