@@ -59,7 +59,6 @@ Scenario: Consultar un libro inexistente
 
 ### Endpoint
 GET /api/v1/loan/{name}
-- Auth: sí
 - Path: `name` (string)
 - Responses:
   - 200: `{ "results": [ { "id": integer, "name": string, "status": "RETURNED"|"ON_LOAN" } ] }`
