@@ -70,13 +70,26 @@ PATCH /api/v1/loan
 ## 3. LISTA DE TAREAS
 
 ### Backend
-- [ ] `LoanRepository.get_by_id(loan_id)` y `update_return(loan_id, date_return)`.
-- [ ] Validar existencia y estado antes de actualizar.
+- [x] `LoanRepository.get_by_id(loan_id)` y `update_return(loan_id, date_return)`.
+  - Implementados getActiveLoanByBook, getActiveLoanByReader, getActiveLoanByBookAndReader, getActiveLoanByTitleAndReader, getActiveLoanByTitle, updateReturn
+- [x] Validar existencia y estado antes de actualizar.
+  - Schema Zod para validación de campos (id_book, id_reader, name_reader con reglas complejas)
+  - Lógica de búsqueda inteligente en LoanService.returnLoan basada en parámetros
+  - Validaciones de estado de préstamo (RETURNED vs ON_LOAN)
+- [x] Endpoint PATCH /api/v1/loan implementado con respuestas 200/404/409/400.
+- [x] Manejo centralizado de errores en middleware.
 - [ ] Tests: devolución en fecha, devolución no activa, payload inválido.
 
 ### Frontend
-- [ ] `ReturnForm` + validaciones de inputs.
-- [ ] Mostrar mensajes claros para 404/409/400.
+- [x] `ReturnForm` + validaciones de inputs.
+  - Component ReturnForm.jsx con inputs flexibles (id_book, title, type_id_reader, id_reader, date_return)
+  - Validación de búsqueda inteligente: al menos uno de id_book o id_reader requerido
+  - Validación de fecha: no puede ser futura
+  - Campo title deshabilitado si id_book está vacío
+- [x] Mostrar mensajes claros para 404/409/400.
+  - Hook useLoan.returnLoan() con manejo de errores específicos
+  - Alertas visuales para LOAN_NOT_FOUND (404), ALREADY_RETURNED (409), INVALID_PAYLOAD (400)
+  - Alertas de éxito/error estilizadas en el formulario
 
 ### QA
 - [ ] Fixtures: préstamo activo, solicitud de devolución con fecha límite y con fecha tardía.
