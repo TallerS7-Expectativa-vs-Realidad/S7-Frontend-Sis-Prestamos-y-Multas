@@ -30,7 +30,7 @@ export default function LoanForm() {
   // Form fields
   const [idBook, setIdBook] = useState('');
   const [title, setTitle] = useState('');
-  const [typeIdReader, setTypeIdReader] = useState('CI');
+  const [typeIdReader, setTypeIdReader] = useState('DNI');
   const [idReader, setIdReader] = useState('');
   const [nameReader, setNameReader] = useState('');
   const [loanDays, setLoanDays] = useState('7');
@@ -68,6 +68,7 @@ export default function LoanForm() {
     setTitle('');
     setIdReader('');
     setNameReader('');
+    setTypeIdReader('DNI');
     setLoanDays('7');
   };
 

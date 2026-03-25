@@ -76,6 +76,85 @@ class LoanService {
   async getLoanById(loan_id) {
     return await this.loanRepository.getLoanById(loan_id);
   }
+
+  /**
+   * Register the return of a loan (HU-03 and HU-04)
+   * Validates:
+   * - At least one of id_book or id_reader is provided
+   * - Loan exists (404 if not found or multiple matches)
+   * - Loan is not already returned (409 if already returned)
+   * Updates loan with date_return and state=RETURNED
+   * 
+   * Search logic:
+   * - If both id_book and id_reader provided: find by both (exact match)
+   * - If only id_book provided: find by book (use name_reader to narrow search if provided)
+   * - If only id_reader provided: find by reader
+   */
+  async returnLoan(returnData) {
+    const { id_book, id_reader, name_reader, date_return, type_id_reader } = returnData;
+
+    let loan = null;
+    
+    // Normalize inputs: convert empty strings to null
+    const normalizedIdBook = id_book && String(id_book).trim() !== '' ? String(id_book).trim() : null;
+    const normalizedIdReader = id_reader && String(id_reader).trim() !== '' ? String(id_reader).trim() : null;
+    const normalizedNameReader = name_reader && String(name_reader).trim() !== '' ? String(name_reader).trim() : null;
+
+    // Search for loan based on provided criteria
+    try {
+      if (normalizedIdBook && normalizedIdReader) {
+        // Both id_book and id_reader provided: exact match
+        loan = await this.loanRepository.getActiveLoanByBookAndReader(
+          normalizedIdBook,
+          normalizedIdReader
+        );
+      } else if (normalizedIdBook && normalizedNameReader) {
+        // id_book and name_reader provided: search by book with reader name
+        loan = await this.loanRepository.getActiveLoanByTitleAndReader(
+          normalizedNameReader,
+          normalizedIdBook
+        );
+      } else if (normalizedIdBook) {
+        // Only id_book provided: search by book
+        loan = await this.loanRepository.getActiveLoanByBook(normalizedIdBook);
+      } else if (normalizedIdReader) {
+        // Only id_reader provided: search by reader
+        loan = await this.loanRepository.getActiveLoanByReader(normalizedIdReader);
+      }
+    } catch (error) {
+      const err = new Error(`Error searching for loan: ${error.message}`);
+      err.code = 'SEARCH_ERROR';
+      err.statusCode = 500;
+      throw err;
+    }
+
+    // Check if loan was found
+    if (!loan) {
+      const error = new Error('Loan not found with provided criteria');
+      error.code = 'LOAN_NOT_FOUND';
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Check if loan is already returned
+    if (loan.state === 'RETURNED') {
+      const error = new Error('Loan has already been returned');
+      error.code = 'ALREADY_RETURNED';
+      error.statusCode = 409;
+      throw error;
+    }
+
+    // Update loan return information
+    try {
+      const updatedLoan = await this.loanRepository.updateReturn(loan.loan_id, date_return);
+      return updatedLoan;
+    } catch (error) {
+      const err = new Error(`Error updating loan: ${error.message}`);
+      err.code = 'UPDATE_ERROR';
+      err.statusCode = 500;
+      throw err;
+    }
+  }
 }
 
 module.exports = LoanService;

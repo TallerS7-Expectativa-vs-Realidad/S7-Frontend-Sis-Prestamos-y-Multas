@@ -299,7 +299,7 @@ Si todas las comprobaciones pasan, entonces se guarda en la tabla "loan_books" l
 inputs necesarios: 
     - [input] id del libro (integer)
     - [input] nombre del libro (string)
-    - [select] selector de DNI o Cédula (opciones: DNI o Cédula)
+    - [select] selector de DNI o Cédula (opciones: DNI o CI)
     - [input] id del lector (integer) 
 
 uno de los siguientes inputs puede estar vacío

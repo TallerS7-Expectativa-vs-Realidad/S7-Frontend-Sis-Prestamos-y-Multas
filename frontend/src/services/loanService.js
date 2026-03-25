@@ -31,3 +31,22 @@ export async function getLoan(id) {
   const res = await axios.get(`${API_BASE}/api/v1/loan/${id}`);
   return res.data;
 }
+
+/**
+ * Return a book (register return within due date)
+ * @param {Object} returnData - Return data
+ * @param {string} returnData.id_book - Book ID (optional if id_reader is provided)
+ * @param {string} returnData.title - Book title (optional, only used if id_book is provided)
+ * @param {string} returnData.date_return - Return date (YYYY-MM-DD, required)
+ * @param {string} returnData.type_id_reader - Reader ID type (DNI or CI, required)
+ * @param {string} returnData.id_reader - Reader ID (optional if id_book is provided)
+ * @returns {Promise} Updated loan response
+ */
+export async function returnLoan(returnData) {
+  const res = await axios.patch(`${API_BASE}/api/v1/loan`, returnData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return res.data;
+}

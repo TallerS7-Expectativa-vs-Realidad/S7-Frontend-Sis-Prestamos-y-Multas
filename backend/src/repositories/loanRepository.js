@@ -88,6 +88,121 @@ class LoanRepository {
       throw new Error(`Error getting loan by ID: ${error.message}`);
     }
   }
+
+  /**
+   * Get active loan by id_book (returns most recent ON_LOAN record)
+   */
+  async getActiveLoanByBook(id_book) {
+    try {
+      const query = `
+        SELECT * FROM loan_books 
+        WHERE id_book = $1 AND state = 'ON_LOAN'
+        ORDER BY created_at DESC 
+        LIMIT 1
+      `;
+      
+      const result = await this.pool.query(query, [id_book]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error getting active loan by book: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get active loan by id_reader (returns most recent ON_LOAN record)
+   */
+  async getActiveLoanByReader(id_reader) {
+    try {
+      const query = `
+        SELECT * FROM loan_books 
+        WHERE id_reader = $1 AND state = 'ON_LOAN'
+        ORDER BY created_at DESC 
+        LIMIT 1
+      `;
+      
+      const result = await this.pool.query(query, [id_reader]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error getting active loan by reader: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get active loan by id_book AND id_reader (for exact match)
+   */
+  async getActiveLoanByBookAndReader(id_book, id_reader) {
+    try {
+      const query = `
+        SELECT * FROM loan_books 
+        WHERE id_book = $1 AND id_reader = $2 AND state = 'ON_LOAN'
+        ORDER BY created_at DESC 
+        LIMIT 1
+      `;
+      
+      const result = await this.pool.query(query, [id_book, id_reader]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error getting active loan by book and reader: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get active loan by title AND id_reader (for search by name)
+   */
+  async getActiveLoanByTitleAndReader(title, id_reader) {
+    try {
+      const query = `
+        SELECT * FROM loan_books 
+        WHERE title ILIKE $1 AND id_reader = $2 AND state = 'ON_LOAN'
+        ORDER BY created_at DESC 
+        LIMIT 1
+      `;
+      
+      const result = await this.pool.query(query, [title, id_reader]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error getting active loan by title and reader: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get active loan by title only (returns most recent ON_LOAN record with matching title)
+   */
+  async getActiveLoanByTitle(title) {
+    try {
+      const query = `
+        SELECT * FROM loan_books 
+        WHERE title ILIKE $1 AND state = 'ON_LOAN'
+        ORDER BY created_at DESC 
+        LIMIT 1
+      `;
+      
+      const result = await this.pool.query(query, [title]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error getting active loan by title: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update loan return information
+   * Sets date_return and changes state to RETURNED
+   */
+  async updateReturn(loan_id, date_return) {
+    try {
+      const query = `
+        UPDATE loan_books 
+        SET date_return = $1, state = 'RETURNED', updated_at = NOW()
+        WHERE loan_id = $2
+        RETURNING *
+      `;
+
+      const result = await this.pool.query(query, [date_return, loan_id]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error updating loan return: ${error.message}`);
+    }
+  }
 }
 
 module.exports = LoanRepository;
