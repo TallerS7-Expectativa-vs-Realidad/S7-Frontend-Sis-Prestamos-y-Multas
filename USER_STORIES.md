@@ -16,7 +16,7 @@
 - Regla 10: Cada libro conserva un historial de préstamos realizados.
 
 ## Dependencias
-- Requiere que existe información base del libro y sus préstamos
+- Requiere historial de préstamos consultable por identificador del libro.
 
 ## Story Points
 - 3 puntos

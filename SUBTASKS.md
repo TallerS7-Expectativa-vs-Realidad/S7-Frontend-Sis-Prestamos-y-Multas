@@ -589,22 +589,23 @@ El resultado de esto se redondeará hacia arriba para obtener la semana de demor
 
 la cantidad de semanas será la cantidad de iteraciones de fibonacci. Se debe tener en cuenta que la secuencia se relacionará de la siguiente manera: \
 1 -> semana 1 \
-2 -> semana 2 \
-3 -> semana 3 \
-5 -> semana 4 \
-8 -> semana 5 \
-13 -> semana 6 \
+1 -> semana 2 \
+2 -> semana 3 \
+3 -> semana 4 \
+5 -> semana 5 \
+8 -> semana 6 \
 ... -> ...
 
 
-Esto se multiplicará por el valor de multa especificado por la biblioteca en el input inicial UI.
+Cada semana de la iteración en fibonacci se multiplicará por el valor de multa especificado por la biblioteca en el input inicial UI y se sumaran todos estos valores para obtener la multa acumulada.
 
 Por ejemplo, si la multa es de 2 U$D (dólares) como valor base, entonces:
-- 1-7 días → 1 semana -> 1 * 2 = 2 U$D (dólares)
-- 8-14 días → 2 semanas -> 2 * 2 = 4 U$D (dólares)
-- 15-21 días → 3 semanas -> 3 * 2 = 6 U$D (dólares)
-- 22-28 días → 4 semanas -> 5 * 2 = 10 U$D (dólares)
-- 29-35 días → 5 semanas -> 8 * 2 = 16 U$D (dólares)
+- 1-7 días → 1 semana -> 1 * 2 + 0 = 2 U$D (dólares)
+- 8-14 días → 2 semanas -> 1 * 2 + 2 = 4 U$D (dólares)
+- 15-21 días → 3 semanas -> 2 * 2 + 4 = 8 U$D (dólares)
+- 22-28 días → 4 semanas -> 3 * 2 + 8 = 14 U$D (dólares)
+- 29-35 días → 5 semanas -> 5 * 2 + 14 = 24 U$D (dólares)
+- 36-42 días → 6 semanas -> 8 * 2 + 24 = 40 U$D (dólares)
 - ...
 
 Este resultado final será guardado en la carga de la multa
