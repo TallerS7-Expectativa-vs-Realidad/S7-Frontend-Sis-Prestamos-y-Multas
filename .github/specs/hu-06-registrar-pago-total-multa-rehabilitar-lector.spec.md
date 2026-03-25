@@ -53,7 +53,6 @@ Scenario: Intentar pagar deuda inexistente
 
 ### Endpoint
 POST /api/v1/debt/pay
-- Auth: sí
 - Body: `{ id_reader, type_id_reader, amount }`
 - Logic: verificar deuda más reciente `state_dept = PENDING` y `amount_dept == amount` (o aceptar amount >= amount_dept)
 - Responses:
