@@ -1,44 +1,43 @@
 ---
-applyTo: "backend/tests/**/*.py,frontend/src/__tests__/**/*.{js,jsx}"
+applyTo: "backend/tests/**,frontend/src/__tests__/**"
 ---
 
-> **Scope**: Las reglas de backend aplican a proyectos con tests en Python; las de frontend aplican a proyectos con tests en JS/JSX. En proyectos con otro stack, adaptar las herramientas y convenciones manteniendo los principios (independencia, aislamiento, AAA, cobertura ≥ 80%).
+> **Scope**: Adaptado a proyectos con backend en Node.js (Express) y frontend en React (Vite). Usa Jest/Vitest y Supertest para backend, y Vitest + Testing Library para frontend.
 
 # Instrucciones para Archivos de Pruebas Unitarias
 
 ## Principios
 
-- **Independencia**: cada test es 100% independiente — sin estado compartido entre tests.
-- **Aislamiento**: mockear SIEMPRE dependencias externas (DB, Firebase, API REST, sistema de archivos).
-- **Claridad**: nombre del test debe describir la función bajo prueba y el escenario (qué pasa cuando X).
-- **Cobertura**: cubrir happy path, error path y edge cases para cada unidad.
+- **Independencia**: cada test es 100% independiente — sin estado compartido.
+- **Aislamiento**: mockear SIEMPRE dependencias externas (DB, servicios externos).
+- **Claridad**: nombre del test debe describir la función bajo prueba y el escenario.
+- **Cobertura**: objetivo razonable ≥ 80% en lógica de negocio.
 
-## Backend (pytest)
+## Backend (Jest + Supertest)
 
 ### Estructura de archivos
 ```
 backend/tests/
-  conftest.py                        ← fixtures compartidas
-  services/test_<feature>_service.py
-  repositories/test_<feature>_repository.py
-  routes/test_<feature>_router.py
+  unit/
+    services/
+    repositories/
+  integration/
+    routes/
 ```
 
 ### Convenciones
-- Nombre: `test_[función]_[escenario]` (ej: `test_create_user_success`, `test_create_user_duplicate_email`)
-- Usar `@pytest.mark.asyncio` para funciones asíncronas.
-- Mockear repositorios en tests de servicios con `AsyncMock`.
-- Usar `AsyncClient` + `ASGITransport` para tests de endpoints.
+- Usar `jest.fn()` o bibliotecas de mocking (vi.mock en Vitest) para aislar dependencias.
+- Para tests de endpoints usar `supertest` contra una instancia de Express montada en memoria.
 
-```python
-# Ejemplo mínimo de test de servicio
-@pytest.mark.asyncio
-async def test_create_user_success():
-    mock_repo = MagicMock()
-    mock_repo.create = AsyncMock(return_value={"uid": "abc"})
-    service = UserService(mock_repo)
-    result = await service.create({"uid": "abc", "email": "a@b.com"})
-    assert result["uid"] == "abc"
+```js
+// Ejemplo mínimo con Supertest
+const request = require('supertest');
+const { app } = require('../../src/app');
+
+test('GET /api/v1/health returns 200', async () => {
+  const res = await request(app).get('/api/v1/health');
+  expect(res.status).toBe(200);
+});
 ```
 
 ## Frontend (Vitest + Testing Library)
@@ -46,56 +45,30 @@ async def test_create_user_success():
 ### Estructura de archivos
 ```
 frontend/src/__tests__/
-  [ComponentName].test.jsx
-  use[HookName].test.js
+  components/
+  hooks/
+  pages/
 ```
 
 ### Convenciones
-- Nombre del describe: nombre del componente/hook.
-- Nombre del it/test: `[verbo] [qué hace] [condición]` (ej: `renders login button when unauthenticated`).
-- Usar `vi.mock()` para mockear módulos externos (Firebase, fetch).
-- Siempre limpiar mocks con `beforeEach(() => vi.clearAllMocks())`.
+- Usar `vi.mock()` para mockear módulos externos.
+- Renderizar componentes con `@testing-library/react`.
 
 ```jsx
-// Ejemplo mínimo de test de componente
-describe('LoginPage', () => {
-  it('renders email input', () => {
-    render(<LoginPage />);
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-  });
+import { render, screen } from '@testing-library/react';
+import LoginPage from '../../pages/LoginPage';
+
+test('renders email input', () => {
+  render(<LoginPage />);
+  expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
 });
 ```
 
 ## Nunca hacer
 
-- Tests que dependen del orden de ejecución.
-- Llamadas reales a Firebase, MongoDB o APIs externas.
+- Tests que dependan del orden de ejecución.
+- Llamadas reales a bases de datos o APIs externas (usar mocks/stubs).
 - `console.log` permanentes en tests.
 - Lógica condicional dentro de un test (if/else).
 - Usar `sleep` para sincronización temporal (cero tests "flaky").
 
----
-
-> Para quality gates, pirámide de testing, TDD, CDC y nomenclatura Gherkin, ver `.github/docs/lineamientos/dev-guidelines.md` §7 y `.github/docs/lineamientos/qa-guidelines.md`.
-
-### Estructura AAA obligatoria
-```python
-# GIVEN — preparar datos y contexto
-# WHEN  — ejecutar la acción bajo prueba
-# THEN  — verificar el resultado esperado
-```
-
-### DoR de Automatización
-Antes de automatizar un flujo, verificar:
-- [ ] Caso ejecutado exitosamente en manual sin bugs críticos
-- [ ] Caso de prueba detallado con datos identificados
-- [ ] Viabilidad técnica comprobada
-- [ ] Ambiente estable disponible
-- [ ] Aprobación del equipo
-
-### DoD de Automatización
-Un script finaliza cuando:
-- [ ] Código revisado por pares (pull request review)
-- [ ] Datos desacoplados del código
-- [ ] Integrado al pipeline de CI
-- [ ] Con documentación y trazabilidad hacia la HU

@@ -1,8 +1,8 @@
 ---
-applyTo: "frontend/src/**/*.{js,jsx}"
+applyTo: "frontend/src/**/*.{js,jsx,ts,tsx}"
 ---
 
-> **Scope**: Se aplica a proyectos con capa frontend. Si el proyecto es backend-only, este archivo no tiene efecto. Si el frontend usa otro framework (Vue, Angular, Svelte, etc.), adaptar las convenciones de componentes, rutas y estado al stack real.
+> **Scope**: Se aplica a proyectos con capa frontend en React + Vite.
 
 # Instrucciones para Archivos de Frontend (React/Vite)
 
@@ -17,16 +17,15 @@ applyTo: "frontend/src/**/*.{js,jsx}"
 
 ```
 src/
-  config/firebase.js      ← init Firebase (solo aquí)
-  hooks/useAuth.js        ← fuente única de verdad para auth
-  services/authService.js ← Firebase signIn + POST backend
-  components/ProtectedRoute.jsx
-  pages/                  ← PageName.jsx + PageName.module.css
+  services/            ← llamadas HTTP (usar axios)
+  hooks/               ← hooks reutilizables (useAuth, useFetch)
+  components/          ← componentes UI (uno por archivo)
+  pages/               ← páginas registrar rutas en App.jsx
 ```
 
 ## Llamadas a la API Backend
 
-Usar siempre **Axios** (no `fetch`). Las llamadas van en `services/`, nunca directamente en componentes o páginas.
+Usar siempre **Axios** o el cliente HTTP acordado. Las llamadas van en `services/`, nunca directamente en componentes.
 
 ```js
 // services/featureService.js
@@ -39,23 +38,14 @@ export async function getFeatures(token) {
   });
   return res.data;
 }
-
-export async function createFeature(data, token) {
-  const res = await axios.post(`${API_BASE}/api/v1/features`, data, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return res.data;
-}
 ```
 
-El token se obtiene siempre desde `useAuth()`:
-```js
-const { token } = useAuth();
-```
+El token se obtiene desde el provedor de auth del proyecto (`useAuth()` o similar).
 
 ## Rutas (React Router v6)
 
-Las rutas se registran en `src/App.jsx`:
+Registrar rutas en `src/App.jsx` o el punto de entrada:
+
 ```jsx
 <Route path="/nueva-ruta" element={<ProtectedRoute><NuevaPagina /></ProtectedRoute>} />
 ```
@@ -63,5 +53,11 @@ Las rutas se registran en `src/App.jsx`:
 ## Componentes
 
 - Un componente por archivo.
-- Props tipadas con JSDoc si son complejas.
-- No lógica de negocio en los componentes — delegar a hooks o servicios.
+- Props tipadas con JSDoc o TypeScript cuando sean complejas.
+- No lógica de negocio en los componentes — delegar a hooks o services.
+
+## Nunca hacer
+
+- Hardcodear URL del API en componentes.
+- Llamadas HTTP directamente desde componentes sin usar `services/`.
+- Mantener múltiples fuentes de verdad para auth.

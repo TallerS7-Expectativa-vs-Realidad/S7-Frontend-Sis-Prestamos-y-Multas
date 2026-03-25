@@ -8,8 +8,8 @@ argument-hint: "<nombre-feature>"
 
 ## Prerequisitos
 1. Leer spec: `.github/specs/<feature>.spec.md` — sección 2.3 (componentes, páginas, hooks)
-2. Leer stack: `.github/instructions/backend.instructions.md`
-3. Leer arquitectura: `.github/instructions/backend.instructions.md`
+2. Leer stack: `.github/instructions/frontend.instructions.md`
+3. Leer arquitectura: `.github/instructions/frontend.instructions.md`
 
 ## Orden de implementación
 ```
@@ -29,7 +29,7 @@ services → hooks/state → components → pages/views → registrar ruta
 - Token en header: `Authorization: Bearer <token>` en todas las llamadas protegidas
 - Estilos: usar ÚNICAMENTE el sistema de estilos aprobado en el proyecto (ver contexto)
 
-Ver patrones específicos en `.claude/rules/frontend.md` y `.github/instructions/backend.instructions.md`.
+Ver patrones específicos en `.claude/rules/frontend.md` y `.github/instructions/frontend.instructions.md`.
 
 ## Restricciones
 - Solo directorio de frontend del proyecto. No tocar backend.
