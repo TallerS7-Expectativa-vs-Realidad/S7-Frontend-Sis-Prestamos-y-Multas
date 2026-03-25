@@ -29,7 +29,7 @@ services → hooks/state → components → pages/views → registrar ruta
 - Token en header: `Authorization: Bearer <token>` en todas las llamadas protegidas
 - Estilos: usar ÚNICAMENTE el sistema de estilos aprobado en el proyecto (ver contexto)
 
-Ver patrones específicos en `.claude/rules/frontend.md` y `.github/instructions/frontend.instructions.md`.
+Ver patrones específicos en `.github/instructions/frontend.instructions.md`.
 
 ## Restricciones
 - Solo directorio de frontend del proyecto. No tocar backend.

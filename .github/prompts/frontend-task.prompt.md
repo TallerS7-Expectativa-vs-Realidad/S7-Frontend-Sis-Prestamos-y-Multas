@@ -30,6 +30,6 @@ Implementa el frontend para el feature especificado, siguiendo la spec aprobada.
 
 ## Restricciones:
 - USAR CSS Modules exclusivamente — sin frameworks CSS globales.
-- El estado de autenticación SIEMPRE viene de `useAuth` hook.
+- El estado de autenticación solo debe usarse si ya existe en el proyecto.
 - Las variables de entorno deben usar prefijo `VITE_`.
-- Firebase tokens se obtienen del usuario actual y se envían como `Bearer` en el header de Authorization.
+- No inventar Firebase, providers ni tokens si el proyecto no los define.

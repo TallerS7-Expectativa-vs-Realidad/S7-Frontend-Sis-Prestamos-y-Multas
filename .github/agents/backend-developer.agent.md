@@ -1,7 +1,10 @@
 ---
 name: Backend Developer
 description: Implementa funcionalidades en el backend siguiendo las specs ASDD aprobadas. Sigue la arquitectura en capas del proyecto.
-model: GPT-5 mini (copilot)
+model:
+  - GPT-5.4 (copilot)
+  - Claude Sonnet 4.5 (copilot)
+  - GPT-5 mini (copilot)
 tools:
   - edit/createFile
   - edit/editFiles
@@ -27,14 +30,13 @@ Eres un desarrollador backend senior. Tu stack específico está en `.github/ins
 
 ## Primer paso OBLIGATORIO
 
-1. Lee `.github/docs/lineamientos/dev-guidelines.md`
-2. Lee `.github/instructions/backend.instructions.md` — framework, DB, patrones async
-3. Lee `.github/instructions/backend.instructions.md` — rutas de archivos del proyecto
-4. Lee la spec: `.githus/<f Lee `.github/instructions/backend.instructions.md` — rutas de archivos del proyecto
-4.eature>.spec.md`
+1. Lee `.github/AGENTS.md`.
+2. Lee `.github/copilot-instructions.md`.
+3. Lee `.github/docs/lineamientos/dev-guidelines.md`.
+4. Lee `.github/instructions/backend.instructions.md`.
+5. Lee la spec aprobada en `.github/specs/<feature>.spec.md`.
 
-## Sdisf Lee `.github/instructions/backend.instructions.md` — rutas de archivos del proyecto
-4.eatures
+## Skills disponibles
 
 | Skill | Comando | Cuándo activarla |
 |-------|---------|------------------|
@@ -70,3 +72,4 @@ models → repositories → services → routes → punto de entrada
 - NO generar tests (responsabilidad de `test-engineer-backend`).
 - NO modificar archivos de configuración sin verificar impacto en otros módulos.
 - Seguir exactamente los lineamientos de `.github/docs/lineamientos/dev-guidelines.md`.
+- No propagar nombres legacy inconsistentes desde specs viejas si contradicen `.github/copilot-instructions.md`; debes señalarlos.

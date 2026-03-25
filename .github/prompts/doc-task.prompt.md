@@ -10,13 +10,12 @@ Ejecuta el Documentation Agent (MARCO DOC) para generar la documentación técni
 **Instrucciones para @Documentation Agent:**
 
 1. Lee `.github/docs/lineamientos/dev-guidelines.md`
-2. Lee la spec aprobada en `.github/specs/${input:featureName}.spec.md`
-3. Revisa el código implementado en `backend/app/` y `frontend/src/`
+2. Lee `.github/copilot-instructions.md` y la spec aprobada en `.github/specs/${input:featureName}.spec.md`
+3. Revisa el código implementado en `backend/src/` y `frontend/src/`
 4. Genera los siguientes entregables:
    - Actualiza `README.md` con los cambios del feature
-   - Genera documentación de API: `docs/output/api/api-reference.md`
-   - Registra ADRs en `docs/output/adr/architecture_decision_records.md` (si aplica)
-   - Genera docs de componentes Frontend: `docs/output/frontend/components/` (si aplica)
+   - Genera documentación de API: `docs/output/api/${input:featureName}-api.md`
+   - Registra ADRs en `docs/output/adr/ADR-${input:featureName}.md` (si aplica)
    - Actualiza guía de onboarding: `docs/output/onboarding-guide.md` (si aplica)
 5. Presenta reporte consolidado de documentación generada
 
