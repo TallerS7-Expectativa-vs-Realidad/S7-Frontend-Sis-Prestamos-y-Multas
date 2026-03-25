@@ -45,10 +45,29 @@ Scenario: Intentar prestar a un lector con deuda
   Then el sistema responde 409 (READER_HAS_DEBT)
 ```
 
+```gherkin
+Scenario: Registrar préstamo a lector rehabilitado tras pago
+  Given el lector tuvo una deuda pendiente
+  And la deuda fue pagada totalmente
+  And el libro está disponible
+  When el bibliotecario registra un préstamo
+  Then el sistema permite la operación
+```
+
+```gherkin
+Scenario: Intentar registrar un préstamo con plazo no permitido
+  Given el libro está disponible
+  And el lector no tiene deuda pendiente por multa
+  And el plazo elegido no es 7, 14 ni 21 días
+  When el bibliotecario registra un préstamo
+  Then el sistema responde 400 (INVALID_LOAN_DAYS)
+```
+
 ### Reglas de Negocio
 - `loan_days` debe ser 7,14 o 21; si no, 400 (INVALID_LOAN_DAYS).
 - Verificar disponibilidad consultando la última tupla por `id_book`.
-- Verificar deuda más reciente en `dept_reader` por `id_reader`.
+- Verificar deuda más reciente en `debt_reader` por `id_reader`.
+- El lector se considera habilitado únicamente cuando no tiene deuda pendiente activa.
 
 ---
 
@@ -56,10 +75,15 @@ Scenario: Intentar prestar a un lector con deuda
 
 ### Modelos
 - `loan_books` (ver HU-01) — insertar nuevo documento con `state=ON_LOAN`, `date_limit` calculada.
-- `dept_reader` usado para verificar deudas (consultar `state_dept= PENDING`).
+- `debt_reader` usado para verificar deudas (consultar `state_debt = PENDING`).
 
 ### Endpoint
+<<<<<<< HEAD
 POST /api/v1/loan
+=======
+POST /api/v1/loans
+- Auth: sí
+>>>>>>> develop
 - Body: `{ id_book, title, type_id_reader, id_reader, name_reader, loan_days }`
 - Responses:
   - 201: Loan creado (ver formato)
@@ -68,12 +92,13 @@ POST /api/v1/loan
 
 ### Frontend
 - Component: `LoanForm` con inputs y select (7/14/21) y cálculo visual de `date_limit`.
-- Hook: `useLoan.createLoan(data)` → `POST /api/v1/loan`.
+- Hook: `useLoan.createLoan(data)` → `POST /api/v1/loans`.
 
 ---
 
 ## 3. LISTA DE TAREAS
 
+<<<<<<< HEAD
 ### Backend ✅ COMPLETADO
 - [x] Validaciones `loan_days` y tipos de id. (Zod schema en `models/Loan.js`)
 - [x] `LoanRepository.insert_loan` y verificación de disponibilidad. (Implementado)
@@ -82,6 +107,13 @@ POST /api/v1/loan
 - [x] Rutas HTTP POST /api/v1/loan y GET /api/v1/loan/:name (loanRoutes.js)
 - [x] Auto-inicialización de base de datos (src/db/initialize.js)
 - [ ] Tests: creación éxito, libro no disponible, lector con deuda.
+=======
+### Backend
+- [ ] Validaciones `loan_days` y tipos de id.
+- [ ] `LoanRepository.insert_loan` y verificación de disponibilidad.
+- [ ] `DebtRepository.get_latest_by_reader` para validar bloqueo.
+- [ ] Tests: creación éxito, libro no disponible, lector con deuda, lector rehabilitado y plazo inválido.
+>>>>>>> develop
 
 ### Frontend
 - [x] `LoanForm` + cálculo visual de fecha límite.

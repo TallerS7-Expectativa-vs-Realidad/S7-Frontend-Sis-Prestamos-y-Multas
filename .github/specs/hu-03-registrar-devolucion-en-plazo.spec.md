@@ -3,7 +3,7 @@ id: SPEC-003
 status: APPROVED
 feature: hu-03-registrar-devolucion-en-plazo
 created: 2026-03-24
-updated: 2026-03-24
+updated: 2026-03-25
 author: spec-generator
 version: "1.0"
 related-specs: [sistema-de-prestamos-y-multas]
@@ -50,11 +50,17 @@ Scenario: Intentar devolver un préstamo no activo
 ## 2. DISEÑO
 
 ### Modelo
-Actualizar `loan_books`: set `date_return`, `state=RETURNED`, `updated_at`.
+Actualizar `loan_books`: set `date_return`, `state=RETURNED`.
 
 ### Endpoint
+<<<<<<< HEAD
 PATCH /api/v1/loan
 - Body: `{ loan_id, date_return, type_id_reader, id_reader, name_reader }`
+=======
+PATCH /api/v1/loans
+- Auth: sí
+- Body: `{ date_return, id_book?, type_id_reader?, id_reader?, name_reader? }`
+>>>>>>> develop
 - Responses:
   - 200: préstamo actualizado (RETURNED)
   - 404: `LOAN_NOT_FOUND`
@@ -63,13 +69,14 @@ PATCH /api/v1/loan
 
 ### Frontend
 - Component: `ReturnForm` — inputs para identificar préstamo y fecha de devolución.
-- Hook: `useLoan.returnLoan(data)` → `PATCH /api/v1/loan`.
+- Hook: `useLoan.returnLoan(data)` → `PATCH /api/v1/loans`.
 
 ---
 
 ## 3. LISTA DE TAREAS
 
 ### Backend
+<<<<<<< HEAD
 - [x] `LoanRepository.get_by_id(loan_id)` y `update_return(loan_id, date_return)`.
   - Implementados getActiveLoanByBook, getActiveLoanByReader, getActiveLoanByBookAndReader, getActiveLoanByTitleAndReader, getActiveLoanByTitle, updateReturn
 - [x] Validar existencia y estado antes de actualizar.
@@ -78,6 +85,10 @@ PATCH /api/v1/loan
   - Validaciones de estado de préstamo (RETURNED vs ON_LOAN)
 - [x] Endpoint PATCH /api/v1/loan implementado con respuestas 200/404/409/400.
 - [x] Manejo centralizado de errores en middleware.
+=======
+- [ ] `LoanRepository.find_active_loan(criteria)` y `update_return(loan_id, date_return)`.
+- [ ] Validar existencia y estado antes de actualizar.
+>>>>>>> develop
 - [ ] Tests: devolución en fecha, devolución no activa, payload inválido.
 
 ### Frontend

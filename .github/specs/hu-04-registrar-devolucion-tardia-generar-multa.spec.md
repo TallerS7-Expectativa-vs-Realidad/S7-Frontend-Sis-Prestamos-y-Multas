@@ -3,7 +3,7 @@ id: SPEC-004
 status: APPROVED
 feature: hu-04-registrar-devolucion-tardia-generar-multa
 created: 2026-03-24
-updated: 2026-03-24
+updated: 2026-03-25
 author: spec-generator
 version: "1.0"
 related-specs: [sistema-de-prestamos-y-multas]
@@ -18,7 +18,7 @@ related-specs: [sistema-de-prestamos-y-multas]
 ## 1. REQUERIMIENTOS
 
 ### Descripción
-Registrar la devolución tardía, calcular la multa acumulativa por semanas completas usando la secuencia Fibonacci y dejar trazabilidad en `dept_reader`.
+Registrar la devolución tardía, calcular la multa acumulativa por semanas completas usando la secuencia Fibonacci y dejar trazabilidad en `debt_reader`.
 
 ### Historia de Usuario
 ```
@@ -34,7 +34,7 @@ Scenario: Registrar una devolución tardía con multa
   When el bibliotecario registra la devolución
   Then el sistema cierra el préstamo
   And calcula la multa según la lógica Fibonacci
-  And crea un registro en dept_reader con state_dept = PENDING
+  And crea un registro en debt_reader con state_debt = PENDING
 ```
 
 ```gherkin
@@ -48,18 +48,18 @@ Scenario: Cambio de tramo semanal
 - Calcular `days_late = (date_return - date_limit).days`.
 - Si `days_late <= 0` → no multa.
 - `weeks = ((days_late - 1) // 7) + 1` para semanas completas.
-- `units_fib` = sum(Fibonacci[0..weeks-1]) ; `amount_dept = units_fib * BASE_FIB_AMOUNT`.
+- `units_fib` = sum(Fibonacci[0..weeks-1]) ; `amount_debt = units_fib * BASE_FIB_AMOUNT`.
 
 ---
 
 ## 2. DISEÑO
 
 ### Modelos
-- `dept_reader`: registrar `loan_id, id_reader, name_reader, units_fib, amount_dept, state_dept (PENDING)`.
+- `debt_reader`: registrar `loan_id, id_reader, name_reader, amount_debt, state_debt (PENDING)`.
 
 ### Endpoint
-PATCH /api/v1/loan (mismo que HU-03)
-- Si se detecta mora, además de actualizar `loan_books`, insertar `dept_reader`.
+PATCH /api/v1/loans (mismo que HU-03)
+- Si se detecta mora, además de actualizar `loan_books`, insertar `debt_reader`.
 - Responses: 200 (RETURNED + deuda creada), 400, 404, 409.
 
 ### Frontend
@@ -71,7 +71,7 @@ PATCH /api/v1/loan (mismo que HU-03)
 
 ### Backend
 - [ ] Implementar función `calculate_fib_units(days_late)` con tests unitarios.
-- [ ] Al procesar devolución tardía, crear `dept_reader` y persistir `units_fib` y `amount_dept`.
+- [ ] Al procesar devolución tardía, crear `debt_reader` y persistir `amount_debt` y `state_debt`.
 - [ ] Tests: cálculo Fibonacci, creación de deuda, enlace con loan_id.
 
 ### Frontend
@@ -80,4 +80,4 @@ PATCH /api/v1/loan (mismo que HU-03)
 
 ### QA
 - [ ] Validar con ejemplos del PRD: 1,7,8,15,22 días.
-- [ ] Verificar trazabilidad en `loan_books` y `dept_reader`.
+- [ ] Verificar trazabilidad en `loan_books` y `debt_reader`.

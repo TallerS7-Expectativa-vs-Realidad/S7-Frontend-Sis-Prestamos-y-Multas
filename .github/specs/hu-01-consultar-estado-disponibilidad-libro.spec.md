@@ -3,7 +3,7 @@ id: SPEC-001
 status: APPROVED
 feature: hu-01-consultar-estado-disponibilidad-libro
 created: 2026-03-24
-updated: 2026-03-24
+updated: 2026-03-25
 author: spec-generator
 version: "1.0"
 
@@ -39,16 +39,26 @@ Scenario: Consultar un libro disponible
 ```
 
 ```gherkin
-Scenario: Consultar un libro inexistente
-  Given no existe un libro con el identificador consultado
+Scenario: Consultar un libro sin historial de préstamo
+  Given el libro consultado no registra préstamos previos en el historial
   When el bibliotecario realiza la búsqueda
-  Then el sistema informa que el libro no fue encontrado
+  Then el sistema informa que el libro no registra historial de préstamo
+  And lo considera disponible para préstamo
+```
+
+```gherkin
+Scenario: Consultar un libro con préstamo activo
+  Given existe un libro con último estado ON_LOAN en su historial
+  When el bibliotecario consulta ese libro
+  Then el sistema muestra que el libro no está disponible
+  And muestra que tiene un préstamo activo
 ```
 
 ### Reglas de Negocio
 - Usar historial `loan_books` para determinar disponibilidad.
 - Búsqueda case-insensitive por `title`.
-- Si no hay registros anteriores del libro, considerarlo disponible.
+- Si no hay registros anteriores del libro, informarlo como sin historial y considerarlo disponible.
+- No tratar ausencia de historial como inexistencia bibliográfica.
 
 ---
 
@@ -58,16 +68,21 @@ Scenario: Consultar un libro inexistente
 `loan_books` (subconjunto): `loan_id, id_book, title, state (ON_LOAN|RETURNED), date_return, date_limit`
 
 ### Endpoint
+<<<<<<< HEAD
 GET /api/v1/loan/{name}
+=======
+GET /api/v1/loans/{name}
+- Auth: sí
+>>>>>>> develop
 - Path: `name` (string)
 - Responses:
-  - 200: `{ "results": [ { "id": integer, "name": string, "status": "RETURNED"|"ON_LOAN" } ] }`
+  - 200: `{ "results": [ { "id": integer, "name": string, "status": "RETURNED"|"ON_LOAN" } ], "message"?: string }`
   - 400: `INVALID_NAME`
   - 500: Internal Server Error
 
 ### Frontend
 - Component: `LoanSearch` (`components/LoanSearch.jsx`) con input y botón.
-- Hook: `useLoan.searchByName(name)` → llama `GET /api/v1/loan/{name}` y retorna `results`.
+- Hook: `useLoan.searchByName(name)` → llama `GET /api/v1/loans/{name}` y retorna `results`.
 
 ---
 
@@ -75,8 +90,8 @@ GET /api/v1/loan/{name}
 
 ### Backend
 - [ ] Implementar `LoanRepository.find_by_name(name)` (case-insensitive).
-- [ ] Implementar router `GET /api/v1/loan/{name}`.
-- [ ] Tests: búsqueda existosa, nombre inválido, libro inexistente.
+- [ ] Implementar router `GET /api/v1/loans/{name}`.
+- [ ] Tests: búsqueda exitosa, nombre inválido, libro sin historial, libro con préstamo activo.
 
 ### Frontend
 - [ ] `LoanSearch` component + integración con hook/service.
@@ -84,5 +99,5 @@ GET /api/v1/loan/{name}
 - [ ] E2E/Unit tests UI mocks.
 
 ### QA
-- [ ] Preparar datos: libro disponible, libro prestado, libro inexistente.
+- [ ] Preparar datos: libro disponible, libro prestado y libro sin historial.
 - [ ] Escenarios Gherkin y evidencia.

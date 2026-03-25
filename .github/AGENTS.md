@@ -1,111 +1,69 @@
-# AGENTS.md — ASDD Project
+# AGENTS.md - ASDD Project
 
-> Canonical shared version: this file is the source of truth for shared agent guidelines.
+Este archivo define las reglas compartidas para todos los agentes del repositorio.
 
-This file defines general guidance for all AI agents working in this repository, following the **ASDD (Agent Spec Software Development)** workflow.
+## Contexto base
 
-## Project Summary
+- Stack oficial: Node.js + Express + PostgreSQL + React + Vite.
+- Fuente global de verdad para stack, dominio, DoR y DoD: `.github/copilot-instructions.md`.
+- Lineamientos transversales: `.github/docs/lineamientos/dev-guidelines.md` y `.github/docs/lineamientos/qa-guidelines.md`.
 
-> Ver `README.md` en la raíz del proyecto para stack, arquitectura y estructura de carpetas del proyecto actual.
-> Ver `.github/README.md` para la estructura completa del framework ASDD.
-
-## ASDD Workflow
-
-**Every new feature must follow this pipeline:**
+## Flujo ASDD obligatorio
 
 ```
-[FASE 1 — Secuencial]
-spec-generator    → /generate-spec      → .github/specs/<feature>.spec.md
+[FASE 1 - Secuencial]
+spec-generator -> /generate-spec -> .github/specs/<feature>.spec.md
 
-[FASE 2 — Paralelo ∥]
-database-agent    → modelos, migrations, seeders  (si hay cambios de DB)
-backend-developer → capas del proyecto (controllers/services/repos/models)
-frontend-developer→ páginas / componentes / hooks / servicios
+[FASE 2 - Paralelo]
+database-agent    -> esquema, migrations, seeders (si aplica)
+backend-developer -> backend/src/
+frontend-developer-> frontend/src/
 
-[FASE 3 — Paralelo ∥]
-test-engineer-backend  → backend/tests/
-test-engineer-frontend → frontend/src/__tests__/
+[FASE 3 - Paralelo]
+test-engineer-backend  -> backend/tests/
+test-engineer-frontend -> frontend/src/__tests__/
 
-[FASE 4 — Secuencial]
-qa-agent          → /gherkin-case-generator, /risk-identifier, …
+[FASE 4 - Secuencial]
+qa-agent -> docs/output/qa/
 
-[FASE 5 — Opcional]
-documentation-agent → README, API docs, ADRs
+[FASE 5 - Opcional]
+documentation-agent -> README y docs/output/
 ```
 
-## Agent Skills (slash commands)
+## Archivos que deben leerse primero
 
-Skills are portable instruction sets invokable as `/command` in Copilot Chat. They work across VS Code, GitHub Copilot CLI, and Copilot coding agent.
-
-### ASDD Core
-| Skill | Slash Command | Descripción |
-|-------|---------------|-------------|
-| asdd-orchestrate | `/asdd-orchestrate` | Orquesta el flujo completo ASDD o consulta estado |
-| generate-spec | `/generate-spec` | Genera spec técnica en `.github/specs/` |
-| implement-backend | `/implement-backend` | Implementa feature completo en el backend |
-| implement-frontend | `/implement-frontend` | Implementa feature completo en el frontend |
-| unit-testing | `/unit-testing` | Genera suite de tests (backend + frontend) |
-
-### QA
-| Skill | Slash Command | Descripción |
-|-------|---------------|-------------|
-| gherkin-case-generator | `/gherkin-case-generator` | Genera casos Given-When-Then + datos de prueba |
-| risk-identifier | `/risk-identifier` | Clasifica riesgos con Regla ASD (Alto/Medio/Bajo) |
-| automation-flow-proposer | `/automation-flow-proposer` | Propone flujos a automatizar y framework |
-| performance-analyzer | `/performance-analyzer` | Planifica y analiza pruebas de performance |
-
-## Lineamientos y Contexto
-
-Los agentes deben cargar estos archivos como **primer paso** antes de generar cualquier código:
-
-| Documento | Ruta | Agentes que lo cargan |
+| Documento | Ruta | Quien lo carga |
 |---|---|---|
-| Lineamientos de Desarrollo | `.github/docs/lineamientos/dev-guidelines.md` | Backend Developer, Frontend Developer, Database Agent |
+| Reglas globales | `.github/AGENTS.md` | Todos |
+| Stack, dominio, DoR, DoD | `.github/copilot-instructions.md` | Todos |
+| Lineamientos Dev | `.github/docs/lineamientos/dev-guidelines.md` | Backend Developer, Frontend Developer, Database Agent, Documentation Agent |
 | Lineamientos QA | `.github/docs/lineamientos/qa-guidelines.md` | Test Engineer Backend, Test Engineer Frontend, QA Agent |
-| Reglas de Oro | `.github/AGENTS.md` | Todos (siempre activas) |
-| Definition of Done | `.github/copilot-instructions.md` | Test Engineer Backend, Test Engineer Frontend, QA Agent, Orchestrator |
-| Definition of Ready | `.github/copilot-instructions.md` | Spec Generator, Orchestrator |
-| Stack y restricciones | `.github/instructions/backend.instructions.md` | Backend Developer, Frontend Developer, Database Agent |
-| Arquitectura | `.github/instructions/backend.instructions.md` | Backend Developer, Frontend Developer, Spec Generator |
+| Backend scope | `.github/instructions/backend.instructions.md` | Backend Developer, Database Agent, Spec Generator |
+| Frontend scope | `.github/instructions/frontend.instructions.md` | Frontend Developer, Spec Generator |
+| Testing scope | `.github/instructions/tests.instructions.md` | Test Engineer Backend, Test Engineer Frontend, QA Agent |
 
----
+## Reglas de oro
 
-## Reglas de Oro
+1. No hay implementacion sin spec `APPROVED`.
+2. No inventar archivos, rutas, librerias ni artefactos que no existan en este repo.
+3. Si una spec aprobada contradice una regla de negocio vigente, el agente debe reportarlo explicitamente antes de continuar.
+4. Backend siempre en capas; frontend siempre separando services, hooks, components y pages.
+5. No propagar nomenclatura legacy contradictoria como `dept_reader`, `state_dept` o `amount_dept` en nuevos artefactos.
+6. No exponer secretos ni asumir configuraciones no documentadas.
+7. QA y tests deben trabajar sobre comportamiento y riesgos reales del feature, no sobre supuestos del template.
 
-> Principio rector: todas las contribuciones de la IA deben ser seguras, transparentes, con propósito definido y alineadas con las instrucciones explícitas del usuario.
+## Entradas y salidas del pipeline
 
-### I. Integridad del Código y del Sistema
-- **No código no autorizado**: no escribir, generar ni sugerir código nuevo a menos que el usuario lo solicite explícitamente.
-- **No modificaciones no autorizadas**: no modificar, refactorizar ni eliminar código, archivos o estructuras existentes sin aprobación explícita del usuario.
-- **Preservar la lógica existente**: respetar patrones arquitectónicos, estilo de codificación y lógica operativa del proyecto.
-
-### II. Clarificación de Requisitos
-- **Clarificación obligatoria**: si la solicitud es ambigua, incompleta o poco clara, detenerse y solicitar clarificación antes de proceder.
-- **No realizar suposiciones**: basar todas las acciones estrictamente en información explícita proporcionada por el usuario.
-
-### III. Transparencia Operativa
-- **Explicar antes de actuar**: antes de cualquier acción, explicar qué se va a hacer y posibles implicaciones.
-- **Detención ante la incertidumbre**: si surge inseguridad o un conflicto con estas reglas, detenerse y consultar al usuario.
-- **Acciones orientadas a un propósito**: cada acción debe ser directamente relevante para la solicitud explícita.
-
----
-
-## Entradas al Pipeline ASDD
-
-| Tipo | Directorio | Descripción |
+| Tipo | Directorio | Descripcion |
 |------|-----------|-------------|
-| Requerimientos de negocio | `.github/requirements/` | Input: descripción funcional del feature |
-| Especificaciones técnicas | `.github/specs/` | Output del Spec Generator, fuente de verdad para implementación |
+| Requerimientos | `.github/requirements/` | Entrada funcional del feature |
+| Specs | `.github/specs/` | Fuente de verdad tecnica |
+| Artefactos QA | `docs/output/qa/` | Gherkin, riesgos, performance, automatizacion |
 
-## Critical Rules for All Agents
+## Criterio de escalamiento
 
-1. **No implementation without a spec.** Always check `.github/specs/` first.
-2. **Backend architecture is layered** — follow the pattern defined in `.github/instructions/backend.instructions.md`. Never bypass layers.
-3. **Dependency wiring happens at the entry layer** (controller/router) — inject dependencies downward, never upward.
-4. **UI state follows the project architecture** — use a single authoritative source of truth; no parallel state sources.
-5. **I/O operations follow the project concurrency model** — sync or async as defined in `.github/instructions/backend.instructions.md`.
-6. **Never commit secrets or credentials** — `.env`, credential files and API keys must be in `.gitignore`.
+Detenerse y pedir revision humana si ocurre cualquiera de estos casos:
 
-## Development Commands & Integration Notes
-
-> Ver `README.md` en la raíz del proyecto.
+- falta `.github/copilot-instructions.md`, la spec o una instruccion referenciada;
+- la spec aprobada usa nombres de dominio inconsistentes con el README o Sprint 1;
+- el repo real aun no tiene scaffold backend/frontend y un prompt intenta escribir rutas inexistentes como si ya estuvieran montadas.

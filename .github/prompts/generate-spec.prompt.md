@@ -26,7 +26,9 @@ Genera una especificación técnica completa en `.github/specs/` para el siguien
 
 ## La spec debe cubrir:
 - Historias de usuario con criterios de aceptación en Gherkin
-- Modelos de datos (Pydantic + MongoDB)
+- Modelos de datos alineados al MVP (`loan_books`, `debt_reader` cuando aplique)
 - Endpoints de API con request/response y errores
 - Diseño Frontend (páginas, componentes, hooks, servicios)
 - Plan de pruebas (backlog de tasks Backend + Frontend + QA)
+
+No uses nomenclatura legacy como `dept_reader` ni inventes catalogos o servicios no documentados.
