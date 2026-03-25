@@ -3,9 +3,9 @@
  * Handles business logic for loan operations
  */
 class LoanService {
-  constructor(loanRepository, debtRepository) {
+  constructor(loanRepository, debtService) {
     this.loanRepository = loanRepository;
-    this.debtRepository = debtRepository;
+    this.debtService = debtService;
   }
 
   /**
@@ -40,7 +40,7 @@ class LoanService {
     }
 
     // 3. Check if reader has pending debt
-    const pendingDebt = await this.debtRepository.getLatestPendingDebtByReader(
+    const pendingDebt = await this.debtService.getLatestPendingDebtByReader(
       loanData.id_reader
     );
     
@@ -85,10 +85,19 @@ class LoanService {
    * - Loan is not already returned (409 if already returned)
    * Updates loan with date_return and state=RETURNED
    * 
+   * If return is late, calculates Fibonacci-based penalty:
+   * - days_late = (date_return - date_limit).days
+   * - weeks = ((days_late - 1) // 7) + 1
+   * - units_fib = sum(Fibonacci[0..weeks-1])
+   * - amount_dept = units_fib * BASE_FIB_AMOUNT
+   * - Creates dept_reader record with PENDING state
+   * 
    * Search logic:
    * - If both id_book and id_reader provided: find by both (exact match)
    * - If only id_book provided: find by book (use name_reader to narrow search if provided)
    * - If only id_reader provided: find by reader
+   * 
+   * @returns {Object} { loan, debt } where debt is null if no penalty, or debt object if penalty applies
    */
   async returnLoan(returnData) {
     const { id_book, id_reader, name_reader, date_return, type_id_reader } = returnData;
@@ -145,15 +154,55 @@ class LoanService {
     }
 
     // Update loan return information
+    let updatedLoan;
     try {
-      const updatedLoan = await this.loanRepository.updateReturn(loan.loan_id, date_return);
-      return updatedLoan;
+      updatedLoan = await this.loanRepository.updateReturn(loan.loan_id, date_return);
     } catch (error) {
       const err = new Error(`Error updating loan: ${error.message}`);
       err.code = 'UPDATE_ERROR';
       err.statusCode = 500;
       throw err;
     }
+
+    // ============================================================
+    // PROCESS LATE RETURN & GENERATE DEBT (HU-04)
+    // ============================================================
+    let debtRecord = null;
+    
+    // Calculate days late
+    const returnDate = new Date(date_return);
+    const limitDate = new Date(loan.date_limit);
+    const timeDiff = returnDate.getTime() - limitDate.getTime();
+    const days_late = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convert ms to days
+
+    // If late, create debt record
+    if (days_late > 0) {
+      try {
+        // Calculate Fibonacci units and amount
+        const { units_fib, amount_dept } = this.debtService.calculateFibUnits(days_late);
+
+        // Create debt record
+        debtRecord = await this.debtService.createDebt({
+          loan_id: loan.loan_id,
+          id_reader: loan.id_reader,
+          name_reader: loan.name_reader,
+          units_fib,
+          amount_dept,
+        });
+      } catch (error) {
+        const err = new Error(`Error creating debt record: ${error.message}`);
+        err.code = 'DEBT_CREATION_ERROR';
+        err.statusCode = 500;
+        throw err;
+      }
+    }
+
+    // Return both loan and debt (debt will be null if no penalty)
+    return {
+      loan: updatedLoan,
+      debt: debtRecord,
+      days_late: days_late > 0 ? days_late : 0,
+    };
   }
 }
 

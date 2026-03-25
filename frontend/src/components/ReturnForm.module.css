@@ -38,6 +38,10 @@
   font-size: 0.9rem;
 }
 
+.alert p:first-child {
+  margin-top: 0;
+}
+
 .form {
   display: flex;
   flex-direction: column;

@@ -40,7 +40,7 @@ export async function getLoan(id) {
  * @param {string} returnData.date_return - Return date (YYYY-MM-DD, required)
  * @param {string} returnData.type_id_reader - Reader ID type (DNI or CI, required)
  * @param {string} returnData.id_reader - Reader ID (optional if id_book is provided)
- * @returns {Promise} Updated loan response
+ * @returns {Promise} Normalized return response with loan and debt data
  */
 export async function returnLoan(returnData) {
   const res = await axios.patch(`${API_BASE}/api/v1/loan`, returnData, {
@@ -48,5 +48,39 @@ export async function returnLoan(returnData) {
       'Content-Type': 'application/json'
     }
   });
-  return res.data;
+
+  // Normalize backend response structure
+  // Backend returns: { success, data: { loan, debt, days_late } }
+  // Frontend expects: { loan_id, state, date_return, days_late?, units_fib?, amount_dept?, dept_id? }
+  const backendResponse = res.data;
+  
+  if (backendResponse.data) {
+    const { loan, debt, days_late, message } = backendResponse.data;
+    
+    // Merge loan and debt data into a single object
+    const normalizedData = {
+      // Loan info
+      loan_id: loan.loan_id,
+      id_book: loan.id_book,
+      title: loan.title,
+      id_reader: loan.id_reader,
+      name_reader: loan.name_reader,
+      date_return: loan.date_return,
+      state: loan.state,
+      
+      // Debt info (if late return)
+      days_late: days_late || null,
+      ...(debt && {
+        dept_id: debt.dept_id,
+        units_fib: debt.units_fib,
+        amount_dept: debt.amount_dept,
+        state_dept: debt.state_dept
+      })
+    };
+    
+    return normalizedData;
+  }
+  
+  // Fallback for different response structure
+  return backendResponse;
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styles from './ReturnForm.module.css';
 import { useLoan } from '../hooks/useLoan.js';
+import DebtSummary from './DebtSummary.jsx';
 
 /**
  * Format date for display (DD/MM/YYYY)
@@ -156,9 +157,14 @@ export default function ReturnForm() {
 
       {success && loanData && (
         <div className={styles.alert} data-type="success" role="alert">
-          ✓ Devolución registrada exitosamente
+          <p>✓ Devolución registrada exitosamente</p>
           {loanData.loan_id && <p>ID del préstamo: {loanData.loan_id}</p>}
+          {!loanData.days_late && <p>No hay multa por esta devolución.</p>}
         </div>
+      )}
+
+      {success && loanData && loanData.days_late && (
+        <DebtSummary debt={loanData} />
       )}
 
       <form onSubmit={handleSubmit} className={styles.form}>

@@ -49,6 +49,11 @@ module.exports = function makeLoanRouter({ loanService }) {
    * - name_reader: optional (can be null only if id_book is provided)
    * 
    * Response: 200 (success) | 400 (invalid input) | 404 (loan not found) | 409 (already returned) | 500 (server error)
+   * 
+   * Success response includes:
+   * - loan: Updated loan record (state=RETURNED)
+   * - debt: Debt record if late return (null if on-time)
+   * - days_late: Number of days late (0 if on-time)
    */
   router.patch('/', async (req, res, next) => {
     try {
@@ -56,13 +61,20 @@ module.exports = function makeLoanRouter({ loanService }) {
       const validatedData = returnLoanSchema.parse(req.body);
 
       // 2. Call service to return loan (handles business logic and validations)
-      const updatedLoan = await loanService.returnLoan(validatedData);
+      // Service now returns { loan, debt, days_late }
+      const result = await loanService.returnLoan(validatedData);
 
-      // 3. Return 200 with updated loan
+      // 3. Return 200 with updated loan and debt info (if late)
       return res.status(200).json({
         success: true,
-        data: updatedLoan,
-        message: 'Loan return registered successfully',
+        data: {
+          loan: result.loan,
+          debt: result.debt || null, // null if no penalty, debt record if penalty applies
+          days_late: result.days_late,
+          message: result.debt 
+            ? `Loan returned with ${result.days_late} days late. Debt created.`
+            : 'Loan returned on time. No debt generated.',
+        },
       });
     } catch (err) {
       // Delegate error handling to express error middleware

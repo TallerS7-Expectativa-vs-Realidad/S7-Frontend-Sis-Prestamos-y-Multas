@@ -37,8 +37,8 @@ module.exports = function makeApp(pool) {
   const debtRepository = new DebtRepository(pool);
 
   // Services (depend on repositories)
-  const loanService = new LoanService(loanRepository, debtRepository);
   const debtService = new DebtService(debtRepository);
+  const loanService = new LoanService(loanRepository, debtService);
 
   // Routers (depend on services)
   const loanRouter = makeLoanRouter({ loanService });
