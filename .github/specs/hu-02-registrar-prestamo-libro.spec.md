@@ -78,12 +78,7 @@ Scenario: Intentar registrar un préstamo con plazo no permitido
 - `debt_reader` usado para verificar deudas (consultar `state_debt = PENDING`).
 
 ### Endpoint
-<<<<<<< HEAD
 POST /api/v1/loan
-=======
-POST /api/v1/loans
-- Auth: sí
->>>>>>> develop
 - Body: `{ id_book, title, type_id_reader, id_reader, name_reader, loan_days }`
 - Responses:
   - 201: Loan creado (ver formato)
@@ -98,7 +93,6 @@ POST /api/v1/loans
 
 ## 3. LISTA DE TAREAS
 
-<<<<<<< HEAD
 ### Backend ✅ COMPLETADO
 - [x] Validaciones `loan_days` y tipos de id. (Zod schema en `models/Loan.js`)
 - [x] `LoanRepository.insert_loan` y verificación de disponibilidad. (Implementado)
@@ -107,13 +101,6 @@ POST /api/v1/loans
 - [x] Rutas HTTP POST /api/v1/loan y GET /api/v1/loan/:name (loanRoutes.js)
 - [x] Auto-inicialización de base de datos (src/db/initialize.js)
 - [ ] Tests: creación éxito, libro no disponible, lector con deuda.
-=======
-### Backend
-- [ ] Validaciones `loan_days` y tipos de id.
-- [ ] `LoanRepository.insert_loan` y verificación de disponibilidad.
-- [ ] `DebtRepository.get_latest_by_reader` para validar bloqueo.
-- [ ] Tests: creación éxito, libro no disponible, lector con deuda, lector rehabilitado y plazo inválido.
->>>>>>> develop
 
 ### Frontend
 - [x] `LoanForm` + cálculo visual de fecha límite.

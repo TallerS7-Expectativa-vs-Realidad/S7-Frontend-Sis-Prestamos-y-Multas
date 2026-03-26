@@ -68,12 +68,7 @@ Scenario: Consultar un libro con préstamo activo
 `loan_books` (subconjunto): `loan_id, id_book, title, state (ON_LOAN|RETURNED), date_return, date_limit`
 
 ### Endpoint
-<<<<<<< HEAD
 GET /api/v1/loan/{name}
-=======
-GET /api/v1/loans/{name}
-- Auth: sí
->>>>>>> develop
 - Path: `name` (string)
 - Responses:
   - 200: `{ "results": [ { "id": integer, "name": string, "status": "RETURNED"|"ON_LOAN" } ], "message"?: string }`

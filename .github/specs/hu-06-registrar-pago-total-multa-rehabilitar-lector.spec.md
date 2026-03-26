@@ -52,17 +52,10 @@ Scenario: Intentar pagar deuda inexistente
 
 ## 2. DISEÑO
 
-<<<<<<< HEAD
 ### Endpoint
 POST /api/v1/debt/pay
 - Body: `{ id_reader, type_id_reader, amount }`
 - Logic: verificar deuda más reciente `state_dept = PENDING` y `amount_dept == amount` (o aceptar amount >= amount_dept)
-=======
-### Endpoints
-GET /api/v1/readers/debt?typeId={typeId}&id={id_reader}&name={name_reader}
-- Auth: sí
-- Query params: `name` opcional; `id` requiere `typeId`
->>>>>>> develop
 - Responses:
   - 200: `{ id_debt, loan_id, type_id_reader, id_reader, name_reader, amount_debt, state_debt }`
   - 400: `INVALID_QUERY`
