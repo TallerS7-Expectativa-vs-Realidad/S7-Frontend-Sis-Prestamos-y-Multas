@@ -78,7 +78,7 @@ Scenario: Intentar registrar un préstamo con plazo no permitido
 - `debt_reader` usado para verificar deudas (consultar `state_debt = PENDING`).
 
 ### Endpoint
-POST /api/v1/loan
+POST /api/v1/loans
 - Body: `{ id_book, title, type_id_reader, id_reader, name_reader, loan_days }`
 - Responses:
   - 201: Loan creado exitosamente
@@ -105,7 +105,7 @@ POST /api/v1/loan
 - [x] `LoanRepository.insert_loan` y verificación de disponibilidad. (Implementado)
 - [x] `DebtRepository.get_latest_by_reader` para validar bloqueo. (Implementado)
 - [x] Servicio con lógica de negocio (LoanService: validación + orquestación)
-- [x] Rutas HTTP POST /api/v1/loan y GET /api/v1/loan/:name (loanRoutes.js)
+- [x] Rutas HTTP POST /api/v1/loans y GET /api/v1/loans/:name (loanRoutes.js)
 - [x] Auto-inicialización de base de datos (src/db/initialize.js)
 - [ ] Tests: creación éxito, libro no disponible, lector con deuda.
 

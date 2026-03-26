@@ -53,26 +53,24 @@ Scenario: Intentar pagar deuda inexistente
 ## 2. DISEÑO
 
 ### Endpoint
-POST /api/v1/debt/pay
-- Body: `{ id_reader, type_id_reader, amount }`
-- Logic: verificar deuda más reciente `state_dept = PENDING` y `amount_dept == amount` (o aceptar amount >= amount_dept)
-- Responses:
-  - 200: `{ id_debt, loan_id, type_id_reader, id_reader, name_reader, amount_debt, state_debt }`
-  - 400: `INVALID_QUERY`
-  - 404: `DEBT_NOT_FOUND`
-
 PATCH /api/v1/debts/{id_debt}
 - Auth: sí
 - Body: `{ state_debt: "PAID" }`
-- Logic: verificar deuda más reciente `state_debt = PENDING` y permitir solo pago total
+- Logic: verificar deuda existente `state_debt = PENDING` y permitir solo pago total
 - Responses:
   - 200: `{ id_debt, loan_id, type_id_reader, id_reader, name_reader, amount_debt, state_debt: "PAID" }`
   - 404: `DEBT_NOT_FOUND`
   - 409: `DEBT_ALREADY_PAID`
 
+GET /api/v1/debts/{id_reader}
+- Uso actual observado en backend: consulta de deudas pendientes por identificador de lector.
+- Responses:
+  - 200: `{ success, data: Debt[] }`
+  - 500: `INTERNAL_SERVER_ERROR`
+
 ### Frontend
 - Component: `DebtPaymentForm` que permite buscar lector, visualizar deuda pendiente y confirmar pago total.
-- Hook: `useDebt.getReaderDebt(filters)` → `GET /api/v1/readers/debt`.
+- Hook: `useDebt.getReaderDebt(idReader)` → `GET /api/v1/debts/{id_reader}`.
 - Hook: `useDebt.payDebt(idDebt)` → `PATCH /api/v1/debts/{id_debt}`.
 
 ---
@@ -80,9 +78,11 @@ PATCH /api/v1/debts/{id_debt}
 ## 3. LISTA DE TAREAS
 
 ### Backend
-- [ ] `DebtRepository.get_latest_by_reader(id_reader)`.
-- [ ] `DebtRepository.mark_as_paid(id_debt)`.
-- [ ] `DebtService.pay_debt(id_debt)` — validar deuda pendiente y marcar `PAID`.
+- [x] `DebtRepository.getLatestPendingDebtByReader(id_reader)`.
+- [ ] `DebtRepository.markDebtAsPaid(id_debt)`.
+- [ ] `DebtService.payDebt(id_debt)` — validar deuda pendiente y marcar `PAID`.
+- [x] `GET /api/v1/debts/{id_reader}` para consultar deudas pendientes por lector.
+- [ ] `PATCH /api/v1/debts/{id_debt}` para registrar el pago total.
 - [ ] Tests: pago éxito, intento sin deuda, intento sobre deuda ya pagada.
 
 ### Frontend

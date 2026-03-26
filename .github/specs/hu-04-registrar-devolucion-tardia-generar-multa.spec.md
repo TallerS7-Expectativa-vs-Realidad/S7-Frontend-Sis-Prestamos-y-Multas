@@ -74,7 +74,7 @@ Scenario: Cambio de tramo semanal
 - `debt_reader`: registrar `loan_id, id_reader, name_reader, amount_debt, state_debt (PENDING)`.
 
 ### Endpoint
-PATCH /api/v1/loan (mismo que HU-03)
+PATCH /api/v1/loans (mismo que HU-03)
 
 **Payload (desde frontend):**
 ```json
@@ -119,11 +119,11 @@ PATCH /api/v1/loan (mismo que HU-03)
   - ✅ Función actualizada para aceptar `baseFibAmount` como parámetro
   - ✅ Usa valor por defecto (2.00 USD) si no se proporciona desde frontend
   - ✅ Cálculo acumulativo semana por semana
-  - ✅ Retorna `{ units_fib, amount_dept }` correctamente formateado
+  - ✅ Retorna `{ units_fib, amount_debt }` correctamente formateado
 - [x] Al procesar devolución tardía, crear `debt_reader` persistiendo datos de mora.
   - ✅ Esquema de validación `returnLoanSchema` actualizado para aceptar `base_fib_amount`
   - ✅ `LoanService.returnLoan()` extrae y pasa `base_fib_amount` a `calculateFibUnits`
-  - ✅ Deuda creada con `units_fib` y `amount_dept` correctos
+  - ✅ Deuda creada con `units_fib` y `amount_debt` correctos
   - ✅ Estado de deuda: `PENDING`
   - ✅ Trazabilidad: `loan_id, id_reader, name_reader` registerados
 - [x] Documentación y especificación de cálculo Fibonacci acumulativo.

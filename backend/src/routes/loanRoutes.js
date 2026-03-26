@@ -8,8 +8,22 @@ const { createLoanSchema, returnLoanSchema } = require('../models/Loan');
 module.exports = function makeLoanRouter({ loanService }) {
   const router = Router();
 
+  router.get('/:name', async (req, res, next) => {
+    try {
+      const result = await loanService.searchAvailabilityByName(req.params.name);
+
+      return res.status(200).json({
+        success: true,
+        data: result.results,
+        message: result.message,
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   /**
-   * POST /api/v1/loan
+    * POST /api/v1/loans
    * Register a new book loan for a reader
    * 
    * Body: { id_book, title, type_id_reader, id_reader, name_reader, loan_days }
@@ -41,7 +55,7 @@ module.exports = function makeLoanRouter({ loanService }) {
   });
 
   /**
-   * PATCH /api/v1/loan
+    * PATCH /api/v1/loans
    * Register the return of a book (HU-03 on-time and HU-04 late returns)
    * For on-time returns: closes loan without debt
    * For late returns: closes loan and generates debt

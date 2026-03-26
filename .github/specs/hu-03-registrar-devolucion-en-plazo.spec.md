@@ -53,7 +53,7 @@ Scenario: Intentar devolver un préstamo no activo
 Actualizar `loan_books`: set `date_return`, `state=RETURNED`.
 
 ### Endpoint
-PATCH /api/v1/loan (mismo que HU-04)
+PATCH /api/v1/loans (mismo que HU-04)
 - Body: `{ id_book?, id_reader?, name_reader?, date_return, type_id_reader, base_fib_amount? }`
 - Responses:
   - 200: Devolución registrada (RETURNED, sin deuda si es en plazo)
@@ -83,7 +83,7 @@ PATCH /api/v1/loan (mismo que HU-04)
   - Schema Zod para validación de campos (id_book, id_reader, name_reader con reglas complejas)
   - Lógica de búsqueda inteligente en LoanService.returnLoan basada en parámetros
   - Validaciones de estado de préstamo (RETURNED vs ON_LOAN)
-- [x] Endpoint PATCH /api/v1/loan implementado con respuestas 200/404/409/400.
+- [x] Endpoint PATCH /api/v1/loans implementado con respuestas 200/404/409/400.
 - [x] Manejo centralizado de errores en middleware.
 - [ ] Tests: devolución en fecha, devolución no activa, payload inválido.
 

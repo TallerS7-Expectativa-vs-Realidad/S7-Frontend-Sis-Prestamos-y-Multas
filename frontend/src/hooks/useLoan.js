@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { createLoan, returnLoan as returnLoanService } from '../services/loanService.js';
+import {
+  createLoan,
+  returnLoan as returnLoanService,
+  searchLoanByName,
+} from '../services/loanService.js';
 
 /**
  * Hook for managing loan creation
@@ -26,7 +30,7 @@ export function useLoan() {
 
       if (err.response) {
         const status = err.response.status;
-        const errorCode = err.response.data?.error;
+        const errorCode = err.response.data?.code;
 
         if (status === 400) {
           if (errorCode === 'INVALID_LOAN_DAYS') {
@@ -75,7 +79,7 @@ export function useLoan() {
 
       if (err.response) {
         const status = err.response.status;
-        const errorCode = err.response.data?.error;
+        const errorCode = err.response.data?.code;
 
         if (status === 400) {
           if (errorCode === 'INVALID_PAYLOAD') {
@@ -117,9 +121,27 @@ export function useLoan() {
     setLoanData(null);
   };
 
+  const searchByName = async (name) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      return await searchLoanByName(name);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        'No fue posible consultar la disponibilidad del libro'
+      );
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     register,
     returnLoan,
+    searchByName,
     reset,
     isLoading,
     error,

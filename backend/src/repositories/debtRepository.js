@@ -14,8 +14,8 @@ class DebtRepository {
   async getLatestPendingDebtByReader(id_reader) {
     try {
       const query = `
-        SELECT * FROM dept_reader 
-        WHERE id_reader = $1 AND state_dept = 'PENDING'
+        SELECT * FROM debt_reader 
+        WHERE id_reader = $1 AND state_debt = 'PENDING'
         ORDER BY created_at DESC 
         LIMIT 1
       `;
@@ -33,8 +33,8 @@ class DebtRepository {
   async getAllPendingDebtsByReader(id_reader) {
     try {
       const query = `
-        SELECT * FROM dept_reader 
-        WHERE id_reader = $1 AND state_dept = 'PENDING'
+        SELECT * FROM debt_reader 
+        WHERE id_reader = $1 AND state_debt = 'PENDING'
         ORDER BY created_at DESC
       `;
 
@@ -48,10 +48,10 @@ class DebtRepository {
   /**
    * Get a debt by ID
    */
-  async getDebtById(dept_id) {
+  async getDebtById(id_debt) {
     try {
-      const query = 'SELECT * FROM dept_reader WHERE dept_id = $1';
-      const result = await this.pool.query(query, [dept_id]);
+      const query = 'SELECT * FROM debt_reader WHERE id_debt = $1';
+      const result = await this.pool.query(query, [id_debt]);
       return result.rows[0] || null;
     } catch (error) {
       throw new Error(`Error getting debt by ID: ${error.message}`);
@@ -65,20 +65,21 @@ class DebtRepository {
     try {
       const {
         loan_id,
+        type_id_reader,
         id_reader,
         name_reader,
         units_fib,
-        amount_dept,
+        amount_debt,
       } = debtData;
 
       const query = `
-        INSERT INTO dept_reader 
-        (loan_id, id_reader, name_reader, units_fib, amount_dept, state_dept, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, 'PENDING', NOW(), NOW())
+        INSERT INTO debt_reader 
+        (loan_id, type_id_reader, id_reader, name_reader, units_fib, amount_debt, state_debt, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, 'PENDING', NOW(), NOW())
         RETURNING *
       `;
 
-      const values = [loan_id, id_reader, name_reader, units_fib, amount_dept];
+      const values = [loan_id, type_id_reader, id_reader, name_reader, units_fib, amount_debt];
       const result = await this.pool.query(query, values);
       return result.rows[0];
     } catch (error) {
@@ -89,16 +90,16 @@ class DebtRepository {
   /**
    * Update debt payment status
    */
-  async markDebtAsPaid(dept_id) {
+  async markDebtAsPaid(id_debt) {
     try {
       const query = `
-        UPDATE dept_reader 
-        SET state_dept = 'PAID', updated_at = NOW()
-        WHERE dept_id = $1
+        UPDATE debt_reader 
+        SET state_debt = 'PAID', updated_at = NOW()
+        WHERE id_debt = $1
         RETURNING *
       `;
 
-      const result = await this.pool.query(query, [dept_id]);
+      const result = await this.pool.query(query, [id_debt]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error marking debt as paid: ${error.message}`);

@@ -18,7 +18,7 @@ async function migrate() {
     await pool.query(schema);
     
     console.log('✓ Database migration completed successfully');
-    console.log('✓ Tables created: loan_books, dept_reader');
+    console.log('✓ Tables created: loan_books, debt_reader');
     console.log('✓ Indexes created for optimized queries');
     process.exit(0);
   } catch (err) {

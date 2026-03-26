@@ -76,6 +76,25 @@ class LoanRepository {
     }
   }
 
+  async findByName(name) {
+    try {
+      const query = `
+        SELECT DISTINCT ON (id_book)
+          id_book AS id,
+          title AS name,
+          state AS status
+        FROM loan_books
+        WHERE title ILIKE $1
+        ORDER BY id_book, created_at DESC
+      `;
+
+      const result = await this.pool.query(query, [`%${name}%`]);
+      return result.rows;
+    } catch (error) {
+      throw new Error(`Error finding loans by name: ${error.message}`);
+    }
+  }
+
   /**
    * Get a loan by ID
    */
@@ -108,6 +127,22 @@ class LoanRepository {
     }
   }
 
+  async getLatestLoanByBook(id_book) {
+    try {
+      const query = `
+        SELECT * FROM loan_books
+        WHERE id_book = $1
+        ORDER BY created_at DESC
+        LIMIT 1
+      `;
+
+      const result = await this.pool.query(query, [id_book]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error getting latest loan by book: ${error.message}`);
+    }
+  }
+
   /**
    * Get active loan by id_reader (returns most recent ON_LOAN record)
    */
@@ -127,6 +162,22 @@ class LoanRepository {
     }
   }
 
+  async getLatestLoanByReader(id_reader) {
+    try {
+      const query = `
+        SELECT * FROM loan_books
+        WHERE id_reader = $1
+        ORDER BY created_at DESC
+        LIMIT 1
+      `;
+
+      const result = await this.pool.query(query, [id_reader]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error getting latest loan by reader: ${error.message}`);
+    }
+  }
+
   /**
    * Get active loan by id_book AND id_reader (for exact match)
    */
@@ -143,6 +194,22 @@ class LoanRepository {
       return result.rows[0] || null;
     } catch (error) {
       throw new Error(`Error getting active loan by book and reader: ${error.message}`);
+    }
+  }
+
+  async getLatestLoanByBookAndReader(id_book, id_reader) {
+    try {
+      const query = `
+        SELECT * FROM loan_books
+        WHERE id_book = $1 AND id_reader = $2
+        ORDER BY created_at DESC
+        LIMIT 1
+      `;
+
+      const result = await this.pool.query(query, [id_book, id_reader]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error getting latest loan by book and reader: ${error.message}`);
     }
   }
 

@@ -33,8 +33,8 @@ class DebtService {
   /**
    * Get a debt by ID
    */
-  async getDebtById(dept_id) {
-    return await this.debtRepository.getDebtById(dept_id);
+  async getDebtById(id_debt) {
+    return await this.debtRepository.getDebtById(id_debt);
   }
 
   /**
@@ -47,8 +47,8 @@ class DebtService {
   /**
    * Mark a debt as paid
    */
-  async markDebtAsPaid(dept_id) {
-    return await this.debtRepository.markDebtAsPaid(dept_id);
+  async markDebtAsPaid(id_debt) {
+    return await this.debtRepository.markDebtAsPaid(id_debt);
   }
 
   /**
@@ -73,12 +73,12 @@ class DebtService {
    * 
    * @param {number} days_late - Number of days the book is late
    * @param {number} baseFibAmount - Base amount per Fibonacci unit (provided by frontend or default)
-   * @returns {Object} { units_fib, amount_dept }
+  * @returns {Object} { units_fib, amount_debt }
    */
   calculateFibUnits(days_late, baseFibAmount = DEFAULT_BASE_FIB_AMOUNT) {
     // No debt if return is on time or early
     if (days_late <= 0) {
-      return { units_fib: 0, amount_dept: 0 };
+      return { units_fib: 0, amount_debt: 0 };
     }
 
     // Calculate complete weeks
@@ -89,10 +89,10 @@ class DebtService {
 
     // Calculate accumulated debt week by week
     // Each week adds: Fibonacci(week) * baseFibAmount to the accumulated total
-    let amount_dept = 0;
+    let amount_debt = 0;
     for (let week = 0; week < weeks; week++) {
       // Add this week's fine to the accumulated total
-      amount_dept += fibSequence[week] * baseFibAmount;
+      amount_debt += fibSequence[week] * baseFibAmount;
     }
 
     // units_fib represents the total sum of Fibonacci numbers (before multiplying by baseFibAmount)
@@ -100,7 +100,7 @@ class DebtService {
 
     return {
       units_fib,
-      amount_dept: parseFloat(amount_dept.toFixed(2)), // Round to 2 decimal places
+      amount_debt: parseFloat(amount_debt.toFixed(2)),
     };
   }
 

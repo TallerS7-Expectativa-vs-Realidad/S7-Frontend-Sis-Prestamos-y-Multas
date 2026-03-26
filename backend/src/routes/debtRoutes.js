@@ -8,7 +8,7 @@ module.exports = function makeDebtRouter({ debtService }) {
   const router = Router();
 
   /**
-   * GET /api/v1/debt/:id_reader
+    * GET /api/v1/debts/:id_reader
    * Get pending debts for a reader
    */
   router.get('/:id_reader', async (req, res, next) => {

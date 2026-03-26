@@ -85,15 +85,26 @@ Server will run on `http://localhost:3000`
 
 ### Loans
 
-- `POST /api/v1/loan` - Register a new book loan
+- `POST /api/v1/loans` - Register a new book loan
   - Body: `{ id_book, title, type_id_reader, id_reader, name_reader, loan_days }`
   - Returns: 201 (success), 400 (invalid), 409 (conflict)
 
-- `GET /api/v1/loan/{name}` - Check book availability (HU-01)
+- `GET /api/v1/loans/{name}` - Check book availability (HU-01)
+
+- `PATCH /api/v1/loans` - Register book return (HU-03 / HU-04)
+  - Body: `{ date_return, type_id_reader, id_book?, id_reader?, name_reader?, base_fib_amount? }`
+  - Returns: 200 (success), 400 (invalid), 404 (loan not found), 409 (already returned)
+
+- Compatibility aliases currently exposed: `POST|GET|PATCH /api/v1/loan...`
 
 ### Debts
 
-- `GET /api/v1/debt/:id_reader` - Get pending debts for a reader
+- `GET /api/v1/debts/:id_reader` - Get pending debts for a reader
+  - Returns the pending debt records for the supplied reader id
+
+- Compatibility alias currently exposed: `GET /api/v1/debt/:id_reader`
+
+- `PATCH /api/v1/debts/{id_debt}` - Planned for HU-06 debt payment flow, not implemented yet
 
 ## Business Rules
 
@@ -120,7 +131,7 @@ Services are injected into route factories:
 ```javascript
 const loanService = new LoanService(loanRepository, debtRepository);
 const loanRouter = makeLoanRouter({ loanService });
-app.use('/api/v1/loan', loanRouter);
+app.use('/api/v1/loans', loanRouter);
 ```
 
 ### Error Handling
@@ -170,17 +181,18 @@ CREATE TABLE loan_books (
 );
 ```
 
-### dept_reader Table
+### debt_reader Table
 
 ```sql
-CREATE TABLE dept_reader (
-  dept_id SERIAL PRIMARY KEY,
+CREATE TABLE debt_reader (
+  id_debt SERIAL PRIMARY KEY,
   loan_id INTEGER REFERENCES loan_books(loan_id),
+  type_id_reader VARCHAR(50),
   id_reader VARCHAR(255),
   name_reader VARCHAR(255),
   units_fib INTEGER,
-  amount_dept NUMERIC(10, 2),
-  state_dept VARCHAR(50) CHECK (state_dept IN ('PENDING', 'PAID')),
+  amount_debt NUMERIC(10, 2),
+  state_debt VARCHAR(50) CHECK (state_debt IN ('PENDING', 'PAID')),
   created_at TIMESTAMP,
   updated_at TIMESTAMP
 );

@@ -14,21 +14,21 @@ const API_BASE = import.meta.env.VITE_API_URL;
  * @returns {Promise} API response
  */
 export async function createLoan(loanData) {
-  const res = await axios.post(`${API_BASE}/api/v1/loan`, loanData, {
+  const res = await axios.post(`${API_BASE}/api/v1/loans`, loanData, {
     headers: {
       'Content-Type': 'application/json'
     }
   });
-  return res.data;
+  return res.data?.data ?? res.data;
 }
 
 /**
- * Fetch loan details
- * @param {string} id - Loan ID
- * @returns {Promise} Loan details
+ * Search loans by book name
+ * @param {string} name - Book title or fragment
+ * @returns {Promise} Search results
  */
-export async function getLoan(id) {
-  const res = await axios.get(`${API_BASE}/api/v1/loan/${id}`);
+export async function searchLoanByName(name) {
+  const res = await axios.get(`${API_BASE}/api/v1/loans/${encodeURIComponent(name)}`);
   return res.data;
 }
 
@@ -43,7 +43,7 @@ export async function getLoan(id) {
  * @returns {Promise} Normalized return response with loan and debt data
  */
 export async function returnLoan(returnData) {
-  const res = await axios.patch(`${API_BASE}/api/v1/loan`, returnData, {
+  const res = await axios.patch(`${API_BASE}/api/v1/loans`, returnData, {
     headers: {
       'Content-Type': 'application/json'
     }
@@ -51,11 +51,11 @@ export async function returnLoan(returnData) {
 
   // Normalize backend response structure
   // Backend returns: { success, data: { loan, debt, days_late } }
-  // Frontend expects: { loan_id, state, date_return, days_late?, units_fib?, amount_dept?, dept_id? }
+  // Frontend expects: { loan_id, state, date_return, days_late?, units_fib?, amount_debt?, id_debt? }
   const backendResponse = res.data;
   
   if (backendResponse.data) {
-    const { loan, debt, days_late, message } = backendResponse.data;
+    const { loan, debt, days_late } = backendResponse.data;
     
     // Merge loan and debt data into a single object
     const normalizedData = {
@@ -71,10 +71,10 @@ export async function returnLoan(returnData) {
       // Debt info (if late return)
       days_late: days_late || null,
       ...(debt && {
-        dept_id: debt.dept_id,
+        id_debt: debt.id_debt,
         units_fib: debt.units_fib,
-        amount_dept: debt.amount_dept,
-        state_dept: debt.state_dept
+        amount_debt: debt.amount_debt,
+        state_debt: debt.state_debt
       })
     };
     

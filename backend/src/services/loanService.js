@@ -8,6 +8,31 @@ class LoanService {
     this.debtService = debtService;
   }
 
+  async searchAvailabilityByName(name) {
+    const normalizedName = String(name || '').trim();
+
+    if (!normalizedName) {
+      const error = new Error('Invalid book name');
+      error.code = 'INVALID_NAME';
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const results = await this.loanRepository.findByName(normalizedName);
+
+    if (results.length === 0) {
+      return {
+        results: [],
+        message: 'El libro no registra historial de préstamo y se considera disponible para préstamo.',
+      };
+    }
+
+    return {
+      results,
+      message: 'Consulta realizada correctamente.',
+    };
+  }
+
   /**
    * Create a new loan with all validations and business rules
    * Throws specific business logic errors:
@@ -99,7 +124,7 @@ class LoanService {
    * For late returns (days_late > 0), calculates Fibonacci-based penalty using:
    * - days_late = (date_return - date_limit).days
    * - weeks = ((days_late - 1) // 7) + 1
-   * - amount_dept = sum of (Fibonacci[i] * base_fib_amount) for each week (cumulative)
+  * - amount_debt = sum of (Fibonacci[i] * base_fib_amount) for each week (cumulative)
    * 
    * Search logic (flexible identifier):
    * - If both id_book and id_reader: find by both (exact match)
@@ -117,7 +142,8 @@ class LoanService {
   async returnLoan(returnData) {
     const { id_book, id_reader, name_reader, date_return, type_id_reader, base_fib_amount } = returnData;
 
-    let loan = null;
+    let activeLoan = null;
+    let latestLoan = null;
     
     // Normalize inputs: convert empty strings to null
     const normalizedIdBook = id_book && String(id_book).trim() !== '' ? String(id_book).trim() : null;
@@ -127,23 +153,20 @@ class LoanService {
     // Search for loan based on provided criteria
     try {
       if (normalizedIdBook && normalizedIdReader) {
-        // Both id_book and id_reader provided: exact match
-        loan = await this.loanRepository.getActiveLoanByBookAndReader(
+        activeLoan = await this.loanRepository.getActiveLoanByBookAndReader(
           normalizedIdBook,
           normalizedIdReader
         );
-      } else if (normalizedIdBook && normalizedNameReader) {
-        // id_book and name_reader provided: search by book with reader name
-        loan = await this.loanRepository.getActiveLoanByTitleAndReader(
-          normalizedNameReader,
-          normalizedIdBook
+        latestLoan = await this.loanRepository.getLatestLoanByBookAndReader(
+          normalizedIdBook,
+          normalizedIdReader
         );
       } else if (normalizedIdBook) {
-        // Only id_book provided: search by book
-        loan = await this.loanRepository.getActiveLoanByBook(normalizedIdBook);
+        activeLoan = await this.loanRepository.getActiveLoanByBook(normalizedIdBook);
+        latestLoan = await this.loanRepository.getLatestLoanByBook(normalizedIdBook);
       } else if (normalizedIdReader) {
-        // Only id_reader provided: search by reader
-        loan = await this.loanRepository.getActiveLoanByReader(normalizedIdReader);
+        activeLoan = await this.loanRepository.getActiveLoanByReader(normalizedIdReader);
+        latestLoan = await this.loanRepository.getLatestLoanByReader(normalizedIdReader);
       }
     } catch (error) {
       const err = new Error(`Error searching for loan: ${error.message}`);
@@ -152,26 +175,24 @@ class LoanService {
       throw err;
     }
 
-    // Check if loan was found
-    if (!loan) {
-      const error = new Error('Loan not found with provided criteria');
-      error.code = 'LOAN_NOT_FOUND';
-      error.statusCode = 404;
-      throw error;
-    }
-
-    // Check if loan is already returned
-    if (loan.state === 'RETURNED') {
+    if (!activeLoan && latestLoan && latestLoan.state === 'RETURNED') {
       const error = new Error('Loan has already been returned');
       error.code = 'ALREADY_RETURNED';
       error.statusCode = 409;
       throw error;
     }
 
+    if (!activeLoan) {
+      const error = new Error('Loan not found with provided criteria');
+      error.code = 'LOAN_NOT_FOUND';
+      error.statusCode = 404;
+      throw error;
+    }
+
     // Update loan return information
     let updatedLoan;
     try {
-      updatedLoan = await this.loanRepository.updateReturn(loan.loan_id, date_return);
+      updatedLoan = await this.loanRepository.updateReturn(activeLoan.loan_id, date_return);
     } catch (error) {
       const err = new Error(`Error updating loan: ${error.message}`);
       err.code = 'UPDATE_ERROR';
@@ -186,26 +207,25 @@ class LoanService {
     
     // Calculate days late
     const returnDate = new Date(date_return);
-    const limitDate = new Date(loan.date_limit);
+      const limitDate = new Date(activeLoan.date_limit);
     const timeDiff = returnDate.getTime() - limitDate.getTime();
     const days_late = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convert ms to days
 
     // If late, create debt record
     if (days_late > 0) {
       try {
-        // Calculate Fibonacci units and amount using base_fib_amount from frontend
-        const { units_fib, amount_dept } = this.debtService.calculateFibUnits(
+        const { units_fib, amount_debt } = this.debtService.calculateFibUnits(
           days_late,
           base_fib_amount
         );
 
-        // Create debt record
         debtRecord = await this.debtService.createDebt({
-          loan_id: loan.loan_id,
-          id_reader: loan.id_reader,
-          name_reader: loan.name_reader,
+          loan_id: activeLoan.loan_id,
+          type_id_reader: activeLoan.type_id_reader,
+          id_reader: activeLoan.id_reader,
+          name_reader: activeLoan.name_reader,
           units_fib,
-          amount_dept,
+          amount_debt,
         });
       } catch (error) {
         const err = new Error(`Error creating debt record: ${error.message}`);

@@ -85,7 +85,7 @@ export default function LoanForm() {
       {success && loanData && (
         <div className={styles.alert} data-type="success" role="alert">
           ✓ Préstamo registrado exitosamente
-          {loanData.id && <p>ID del préstamo: {loanData.id}</p>}
+          {loanData.loan_id && <p>ID del préstamo: {loanData.loan_id}</p>}
         </div>
       )}
 

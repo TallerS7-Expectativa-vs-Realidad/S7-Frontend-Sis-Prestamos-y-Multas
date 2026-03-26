@@ -48,7 +48,9 @@ module.exports = function makeApp(pool) {
   // ROUTE REGISTRATION
   // ============================================================
   app.use('/api/v1/loan', loanRouter);
+  app.use('/api/v1/loans', loanRouter);
   app.use('/api/v1/debt', debtRouter);
+  app.use('/api/v1/debts', debtRouter);
 
   // ============================================================
   // ERROR HANDLING MIDDLEWARE

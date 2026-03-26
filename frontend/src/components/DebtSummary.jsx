@@ -16,8 +16,8 @@ function calculateWeeks(daysLate) {
  * @param {Object} debt - Debt details object
  * @param {number} debt.days_late - Number of days the book was returned late
  * @param {number} debt.units_fib - Number of Fibonacci units accumulated for the fee
- * @param {number} debt.amount_dept - Total fee amount in currency units
- * @param {string} [debt.dept_id] - Optional: Debt ID for reference
+ * @param {number} debt.amount_debt - Total fee amount in currency units
+ * @param {string} [debt.id_debt] - Optional: Debt ID for reference
  * @returns {JSX.Element} Debt summary display
  */
 export default function DebtSummary({ debt }) {
@@ -25,7 +25,7 @@ export default function DebtSummary({ debt }) {
     return null;
   }
 
-  const { days_late, units_fib, amount_dept, dept_id } = debt;
+  const { days_late, units_fib, amount_debt, id_debt } = debt;
   const weeks = calculateWeeks(days_late);
 
   return (
@@ -57,14 +57,14 @@ export default function DebtSummary({ debt }) {
         <div className={styles.debtItem + ' ' + styles.debtAmount}>
           <span className={styles.label}>Monto de la multa:</span>
           <span className={styles.amount}>
-            ${amount_dept.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${amount_debt.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>
       </div>
 
-      {dept_id && (
+      {id_debt && (
         <div className={styles.debtReference}>
-          <small>ID de deuda: {dept_id}</small>
+          <small>ID de deuda: {id_debt}</small>
         </div>
       )}
 

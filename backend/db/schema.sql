@@ -25,15 +25,16 @@ CREATE TABLE IF NOT EXISTS loan_books (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create dept_reader table for debt tracking
-CREATE TABLE IF NOT EXISTS dept_reader (
-  dept_id SERIAL PRIMARY KEY,
+-- Create debt_reader table for debt tracking
+CREATE TABLE IF NOT EXISTS debt_reader (
+  id_debt SERIAL PRIMARY KEY,
   loan_id INTEGER REFERENCES loan_books(loan_id),
+  type_id_reader VARCHAR(50) NOT NULL,
   id_reader VARCHAR(255) NOT NULL,
   name_reader VARCHAR(255) NOT NULL,
   units_fib INTEGER DEFAULT 0,
-  amount_dept NUMERIC(10, 2) DEFAULT 0,
-  state_dept VARCHAR(50) NOT NULL DEFAULT 'PENDING' CHECK (state_dept IN ('PENDING', 'PAID')),
+  amount_debt NUMERIC(10, 2) DEFAULT 0,
+  state_debt VARCHAR(50) NOT NULL DEFAULT 'PENDING' CHECK (state_debt IN ('PENDING', 'PAID')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -42,5 +43,5 @@ CREATE TABLE IF NOT EXISTS dept_reader (
 CREATE INDEX IF NOT EXISTS idx_loan_books_id_book ON loan_books(id_book);
 CREATE INDEX IF NOT EXISTS idx_loan_books_id_reader ON loan_books(id_reader);
 CREATE INDEX IF NOT EXISTS idx_loan_books_state ON loan_books(state);
-CREATE INDEX IF NOT EXISTS idx_dept_reader_id_reader ON dept_reader(id_reader);
-CREATE INDEX IF NOT EXISTS idx_dept_reader_state_dept ON dept_reader(state_dept);
+CREATE INDEX IF NOT EXISTS idx_debt_reader_id_reader ON debt_reader(id_reader);
+CREATE INDEX IF NOT EXISTS idx_debt_reader_state_debt ON debt_reader(state_debt);

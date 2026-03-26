@@ -139,21 +139,20 @@ export default function ReturnForm() {
       return;
     }
 
-    // Validate base fib amount - debe estar lleno y ser válido
-    if (!baseFibAmount || baseFibAmount.trim() === '') {
-      setBaseFibError('La multa base es requerida');
-      return;
-    }
+    let parsedBaseFibAmount;
+    if (baseFibAmount && baseFibAmount.trim() !== '') {
+      const numBaseFib = parseFloat(baseFibAmount);
+      if (isNaN(numBaseFib)) {
+        setBaseFibError('Debe ser un número válido');
+        return;
+      }
 
-    const numBaseFib = parseFloat(baseFibAmount);
-    if (isNaN(numBaseFib)) {
-      setBaseFibError('Debe ser un número válido');
-      return;
-    }
+      if (numBaseFib < 0.01) {
+        setBaseFibError('El valor debe ser igual o mayor a 0.01');
+        return;
+      }
 
-    if (numBaseFib < 0.01) {
-      setBaseFibError('El valor debe ser igual o mayor a 0.01');
-      return;
+      parsedBaseFibAmount = numBaseFib;
     }
 
     // Validate search criteria
@@ -169,8 +168,11 @@ export default function ReturnForm() {
       date_return: dateReturn,
       type_id_reader: typeIdReader,
       id_reader: idReader || null,
-      base_fib_amount: parseFloat(baseFibAmount)
     };
+
+    if (parsedBaseFibAmount !== undefined) {
+      returnData.base_fib_amount = parsedBaseFibAmount;
+    }
 
     const result = await returnLoan(returnData);
 
@@ -316,7 +318,7 @@ export default function ReturnForm() {
           <legend>Configuración de Multa</legend>
 
           <div className={styles.formGroup}>
-            <label htmlFor="baseFibAmount">Base de Multa Fibonacci (unidad monetaria) *</label>
+            <label htmlFor="baseFibAmount">Base de Multa Fibonacci (unidad monetaria)</label>
             <input
               id="baseFibAmount"
               type="number"
@@ -326,7 +328,6 @@ export default function ReturnForm() {
               placeholder="Ej: 1.00"
               min="0.01"
               step="0.01"
-              required
             />
             {baseFibError && (
               <span className={styles.fieldError}>{baseFibError}</span>
