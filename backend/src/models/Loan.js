@@ -1,9 +1,31 @@
 /**
- * Loan Models
+ * Loan Models - HU-01: Book Availability Search
  * 
- * DEPRECATED: All loan-related schemas have been removed.
- * HU-06 (pago de multas) does not require loan creation or return endpoints.
- * Loan-related features (HU-02, HU-03, HU-04, HU-05) are not implemented in this backend.
+ * DTOs and validations for loan-related operations.
+ * Intentionally minimal to focus on HU-01 requirements.
  */
 
-// Intentionally empty - schemas for HU-02 (create loan) and HU-03/04 (return loan) have been removed
+const { z } = require('zod');
+
+/**
+ * DTO for loan search result
+ * Represents the availability status of a book
+ */
+const LoanSearchResultDTO = z.object({
+  id: z.number().int().positive('Loan ID must be a positive integer'),
+  name: z.string().min(1, 'Book name is required'),
+  status: z.enum(['ON_LOAN', 'RETURNED'], 'Status must be ON_LOAN or RETURNED'),
+});
+
+/**
+ * DTO for search response
+ */
+const SearchByNameResponseDTO = z.object({
+  results: z.array(LoanSearchResultDTO),
+  message: z.string().optional(),
+});
+
+module.exports = {
+  LoanSearchResultDTO,
+  SearchByNameResponseDTO,
+};

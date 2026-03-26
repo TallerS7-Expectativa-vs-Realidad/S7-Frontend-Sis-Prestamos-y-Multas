@@ -4,7 +4,10 @@ const requestLogger = require('./middleware/requestLogger');
 const errorHandler = require('./middleware/errorHandler');
 const DebtRepository = require('./repositories/debtRepository');
 const DebtService = require('./services/DebtService');
+const LoanRepository = require('./repositories/loanRepository');
+const LoanService = require('./services/loanService');
 const makeDebtRouter = require('./routes/debtRoutes');
+const makeLoanRouter = require('./routes/loanRoutes');
 const makeReadersRouter = require('./routes/readersRoutes');
 
 /**
@@ -32,12 +35,15 @@ module.exports = function makeApp(pool) {
 
   // Repositories (depend on database pool)
   const debtRepository = new DebtRepository(pool);
+  const loanRepository = new LoanRepository(pool);
 
   // Services (depend on repositories)
   const debtService = new DebtService(debtRepository);
+  const loanService = new LoanService(loanRepository);
 
   // Routers (depend on services)
   const debtRouter = makeDebtRouter({ debtService });
+  const loanRouter = makeLoanRouter({ loanService });
   const readersRouter = makeReadersRouter({ debtService });
 
   // ============================================================
@@ -45,6 +51,7 @@ module.exports = function makeApp(pool) {
   // ============================================================
   app.use('/api/v1/debt', debtRouter);
   app.use('/api/v1/debts', debtRouter);
+  app.use('/api/v1/loans', loanRouter);
   app.use('/api/v1/readers', readersRouter);
 
   // ============================================================
