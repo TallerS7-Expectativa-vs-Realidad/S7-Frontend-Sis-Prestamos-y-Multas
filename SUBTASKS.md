@@ -301,6 +301,7 @@ inputs necesarios:
     - [input] nombre del libro (string)
     - [select] selector de DNI o Cédula (opciones: DNI o CI)
     - [input] id del lector (integer) 
+    - [input] multa base (real)     
 
 uno de los siguientes inputs puede estar vacío
     - [input] id del libro (integer)

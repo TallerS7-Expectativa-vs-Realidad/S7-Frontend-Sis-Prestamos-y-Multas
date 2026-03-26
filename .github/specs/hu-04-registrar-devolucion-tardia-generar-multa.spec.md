@@ -3,7 +3,7 @@ id: SPEC-004
 status: APPROVED
 feature: hu-04-registrar-devolucion-tardia-generar-multa
 created: 2026-03-24
-updated: 2026-03-25
+updated: 2026-05-14
 author: spec-generator
 version: "1.0"
 related-specs: [sistema-de-prestamos-y-multas]
@@ -41,14 +41,30 @@ Scenario: Registrar una devolución tardía con multa
 Scenario: Cambio de tramo semanal
   Given la devolución ocurre 8 días después de la fecha límite
   When registrar la devolución
-  Then se calcula deuda equivalente a 2 unidades Fibonacci (1+1)
+  Then se calcula deuda acumulativa: multa_semana_2 (1×2) + multa_semana_1 (1×2) = 4 USD
 ```
 
 ### Reglas de Negocio
 - Calcular `days_late = (date_return - date_limit).days`.
 - Si `days_late <= 0` → no multa.
 - `weeks = ((days_late - 1) // 7) + 1` para semanas completas.
-- `units_fib` = sum(Fibonacci[0..weeks-1]) ; `amount_debt = units_fib * BASE_FIB_AMOUNT`.
+- Cálculo **acumulativo** semana por semana (cada semana suma su multa al acumulado anterior):
+  - Semana 1: `multa = Fibonacci(1) × BASE_FIB_AMOUNT = 1 × 2 = 2 USD`
+  - Semana 2: `multa = Fibonacci(2) × BASE_FIB_AMOUNT + acumulado_anterior = 1 × 2 + 2 = 4 USD`
+  - Semana 3: `multa = Fibonacci(3) × BASE_FIB_AMOUNT + acumulado_anterior = 2 × 2 + 4 = 8 USD`
+  - Semana 4: `multa = Fibonacci(4) × BASE_FIB_AMOUNT + acumulado_anterior = 3 × 2 + 8 = 14 USD`
+  - Semana N: `multa = Fibonacci(N) × BASE_FIB_AMOUNT + acumulado_anterior`
+  - `units_fib` = suma total de unidades Fibonacci = `(1 + 1 + 2 + 3 + ... + Fibonacci(N))`
+
+**Tabla de referencia (con BASE_FIB_AMOUNT = 2 USD):**
+| Rango días | Semanas | Fibonacci | Esta semana | Acumulado anterior | Total USD |
+|-----------|---------|-----------|-------------|-------------------|-----------|
+| 1-7       | 1       | 1         | 1×2         | 0                 | $2        |
+| 8-14      | 2       | 1         | 1×2         | 2                 | $4        |
+| 15-21     | 3       | 2         | 2×2         | 4                 | $8        |
+| 22-28     | 4       | 3         | 3×2         | 8                 | $14       |
+| 29-35     | 5       | 5         | 5×2         | 14                | $24       |
+| 36-42     | 6       | 8         | 8×2         | 24                | $40       |
 
 ---
 

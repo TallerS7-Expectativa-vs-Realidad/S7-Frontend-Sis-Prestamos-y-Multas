@@ -6,8 +6,9 @@
 // ============================================================
 // CONSTANTS
 // ============================================================
-// Base amount for Fibonacci unit (can be configured per library)
-const BASE_FIB_AMOUNT = 1.00;
+// Base amount for Fibonacci unit (USD, can be configured per library)
+// According to HU-04 spec, BASE_FIB_AMOUNT = 2 USD per Fibonacci unit
+const BASE_FIB_AMOUNT = 2.00;
 
 class DebtService {
   constructor(debtRepository) {
@@ -51,18 +52,23 @@ class DebtService {
 
   /**
    * Calculate Fibonacci units based on days late
-   * Rules (from PRD and HU-04 spec):
+   * Rules (from HU-04 spec):
    * - If days_late <= 0, no debt (return 0 units)
    * - weeks = ((days_late - 1) // 7) + 1 (complete weeks only)
-   * - units_fib = sum(Fibonacci[0..weeks-1])
-   * - amount_dept = units_fib * BASE_FIB_AMOUNT
+   * - Cálculo ACUMULATIVO semana por semana:
+   *   - Semana 1: multa = Fib(1) × BASE_FIB_AMOUNT = 1 × 2 = 2 USD
+   *   - Semana 2: multa = Fib(2) × BASE_FIB_AMOUNT + acumulado_anterior = 1 × 2 + 2 = 4 USD
+   *   - Semana 3: multa = Fib(3) × BASE_FIB_AMOUNT + acumulado_anterior = 2 × 2 + 4 = 8 USD
+   *   - Semana 4: multa = Fib(4) × BASE_FIB_AMOUNT + acumulado_anterior = 3 × 2 + 8 = 14 USD
+   *   - Y así sucesivamente...
    * 
-   * Examples:
-   * - 1 day late: weeks=1, fib[0]=1, sum=1
-   * - 7 days late: weeks=1, fib[0]=1, sum=1
-   * - 8 days late: weeks=2, fib[0,1]=[1,1], sum=2
-   * - 15 days late: weeks=3, fib[0,1,2]=[1,1,2], sum=4
-   * - 22 days late: weeks=4, fib[0,1,2,3]=[1,1,2,3], sum=7
+   * Examples (with BASE_FIB_AMOUNT = 2):
+   * - 1 day late: weeks=1, amount=(1×2) = 2, units=1
+   * - 7 days late: weeks=1, amount=(1×2) = 2, units=1
+   * - 8 days late: weeks=2, amount=(1×2) + (1×2 + 2) = 4, units=2
+   * - 15 days late: weeks=3, amount=(1×2) + (1×2 + 2) + (2×2 + 4) = 8, units=4
+   * - 22 days late: weeks=4, amount=2 + 4 + 8 + (3×2 + 8) = 14, units=7
+   * - 42 days late: weeks=6, amount accumulates to 40, units=20
    * 
    * @param {number} days_late - Number of days the book is late
    * @returns {Object} { units_fib, amount_dept }
@@ -79,11 +85,16 @@ class DebtService {
     // Generate Fibonacci sequence up to 'weeks' terms
     const fibSequence = this._generateFibonacciSequence(weeks);
 
-    // Sum the Fibonacci units
-    const units_fib = fibSequence.reduce((sum, val) => sum + val, 0);
+    // Calculate accumulated debt week by week
+    // Each week adds: Fibonacci(week) * BASE_FIB_AMOUNT to the accumulated total
+    let amount_dept = 0;
+    for (let week = 0; week < weeks; week++) {
+      // Add this week's fine to the accumulated total
+      amount_dept += fibSequence[week] * BASE_FIB_AMOUNT;
+    }
 
-    // Calculate monetary amount
-    const amount_dept = units_fib * BASE_FIB_AMOUNT;
+    // units_fib represents the total sum of Fibonacci numbers (before multiplying by BASE_FIB_AMOUNT)
+    const units_fib = fibSequence.reduce((sum, val) => sum + val, 0);
 
     return {
       units_fib,
