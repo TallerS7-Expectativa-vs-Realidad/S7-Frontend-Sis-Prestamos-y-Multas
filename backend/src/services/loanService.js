@@ -15,7 +15,8 @@ class LoanService {
    * 
    * Business Rules (from spec):
    * - Búsqueda case-insensitive por title
-   * - Si no hay registros, devolver sin historial y considerar disponible
+   * - Retorna TODAS las copias del libro (identificadas por id_book)
+   * - Si no hay registros anteriores del libro, devolver sin historial y considerar disponible
    * - La disponibilidad se determina por el último estado conocido en historial
    * 
    * @param {string} name - Book title to search for
@@ -40,7 +41,7 @@ class LoanService {
         throw error;
       }
 
-      // Query repository for partial match (more user-friendly search)
+      // Query repository for partial match (helps avoid false positives)
       const loanRecords = await this.loanRepository.findByName(trimmedName);
 
       // If no records found, return empty results with message
@@ -51,12 +52,12 @@ class LoanService {
         };
       }
 
-      // Per spec: "La disponibilidad se determina por el último estado conocido en historial"
-      // Group by book (in case same title is registered multiple times) and get the latest status
-      const uniqueBooks = this._deduplicateBooks(loanRecords);
+      // Per spec: "Retorna TODAS las copias del libro, agrupadas por id_book"
+      // Group by id_book, keeping the most recent loan record for each copy
+      const uniqueBookCopies = this._deduplicateByIdBook(loanRecords);
 
       return {
-        results: uniqueBooks,
+        results: uniqueBookCopies,
       };
     } catch (error) {
       // Re-throw with context preserved
@@ -65,26 +66,32 @@ class LoanService {
   }
 
   /**
-   * Helper: Deduplicate books by title, keeping the most recent loan record
+   * Helper: Group loans by id_book, keeping the most recent record for each copy
+   * 
+   * Each id_book represents a DIFFERENT PHYSICAL COPY of the book.
+   * The same title with different id_book values are separate books.
    * 
    * @private
-   * @param {Array} loanRecords - Array of loan records from query
-   * @returns {Array} Array of deduplicated book records with latest status
+   * @param {Array} loanRecords - Array of loan records from query (already sorted by id_book, created_at DESC)
+   * @returns {Array} Array of deduplicated book copies with latest status
    */
-  _deduplicateBooks(loanRecords) {
-    const bookMap = new Map();
+  _deduplicateByIdBook(loanRecords) {
+    const bookCopies = new Map();
 
     for (const record of loanRecords) {
-      const key = record.name.toLowerCase();
+      const key = record.id_book;
 
-      // If not yet in map, or this record is more recent, update
-      if (!bookMap.has(key)) {
-        bookMap.set(key, record);
+      // If not yet in map, add it (first occurrence is most recent due to ORDER BY)
+      if (!bookCopies.has(key)) {
+        bookCopies.set(key, {
+          id_book: record.id_book,
+          loan_id: record.loan_id,
+          status: record.status,
+        });
       }
-      // Note: Already sorted DESC by created_at from query, so first occurrence is latest
     }
 
-    return Array.from(bookMap.values());
+    return Array.from(bookCopies.values());
   }
 
   /**

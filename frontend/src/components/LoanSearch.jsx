@@ -112,21 +112,26 @@ export default function LoanSearch() {
           <h3>Resultados de la Búsqueda</h3>
           <div className={styles.resultsList}>
             {searchResults.map((result) => (
-              <div key={result.id} className={styles.resultCard}>
+              <div key={result.id_book} className={styles.resultCard}>
                 <div className={styles.resultHeader}>
-                  <h4>{result.name}</h4>
+                  <div className={styles.titleSection}>
+                    <h4>Copia #{result.id_book}</h4>
+                    <p className={styles.copyId}>ID de copia: {result.id_book}</p>
+                  </div>
                   <span className={`${styles.statusBadge} ${getStatusClass(result.status)}`}>
                     {getStatusDisplay(result.status)}
                   </span>
                 </div>
                 <div className={styles.resultDetails}>
                   <p>
-                    <strong>ID:</strong> {result.id}
-                  </p>
-                  <p>
                     <strong>Estado:</strong>{' '}
                     {result.status === 'ON_LOAN' ? 'No disponible (préstamo activo)' : 'Disponible'}
                   </p>
+                  {result.loan_id && (
+                    <p>
+                      <strong>Préstamo ID:</strong> {result.loan_id}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}

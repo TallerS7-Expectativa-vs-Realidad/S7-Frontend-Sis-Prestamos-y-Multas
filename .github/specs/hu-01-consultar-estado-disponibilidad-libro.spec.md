@@ -54,9 +54,22 @@ Scenario: Consultar un libro con préstamo activo
   And muestra que tiene un préstamo activo
 ```
 
+```gherkin
+Scenario: Consultar un libro con múltiples copias
+  Given existen múltiples copias del libro (mismo title, distinto id_book)
+  And algunas copias están disponibles (estado RETURNED o sin historial)
+  And otras copias están en préstamo (estado ON_LOAN)
+  When el bibliotecario consulta ese libro
+  Then el sistema retorna TODAS las copias con su id_book y estado correspondiente
+  So el bibliotecario puede seleccionar una copia disponible si la hay
+```
+
 ### Reglas de Negocio
 - Usar historial `loan_books` para determinar disponibilidad.
 - Búsqueda case-insensitive por `title`.
+- Cada copia del libro es identificada por `id_book`. Copias con el mismo `title` pero distinto `id_book` son libros distintos (físicamente diferentes).
+- Retornar TODAS las copias de un libro (todas con el mismo `title`), agrupadas por `id_book`.
+- Para cada copia, mostrar el estado más reciente (último registro en historial).
 - Si no hay registros anteriores del libro, informarlo como sin historial y considerarlo disponible.
 - No tratar ausencia de historial como inexistencia bibliográfica.
 
@@ -72,8 +85,11 @@ GET /api/v1/loans/{name}
 - Auth: sí
 - Path: `name` (string)
 - Responses:
-  - 200: `{ "results": [ { "id": integer, "name": string, "status": "RETURNED"|"ON_LOAN" } ], "message"?: string }`
-  - 400: `INVALID_NAME`
+  - 200: `{ "results": [ { "id_book": string, "loan_id": integer, "status": "RETURNED"|"ON_LOAN", "message"?: string } ], "message"?: string }`
+    - `id_book`: Identificador único de la copia del libro (puede haber varias copias con el mismo title)
+    - `loan_id`: ID del último préstamo registrado (puede ser null si sin historial)
+    - `status`: Estado más reciente del libro (RETURNED = disponible o sin historial, ON_LOAN = no disponible)
+  - 400: `{ "message": "INVALID_NAME" }`
   - 500: Internal Server Error
 
 ### Frontend

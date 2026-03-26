@@ -165,12 +165,22 @@
   margin-bottom: 12px;
 }
 
-.resultHeader h4 {
-  margin: 0;
+.titleSection {
+  flex: 1;
+}
+
+.titleSection h4 {
+  margin: 0 0 4px 0;
   color: #333;
   font-size: 16px;
   font-weight: 600;
-  flex: 1;
+}
+
+.copyId {
+  margin: 0;
+  color: #666;
+  font-size: 12px;
+  font-weight: 400;
 }
 
 .statusBadge {

@@ -5,7 +5,10 @@ const API_BASE = import.meta.env.VITE_API_URL;
 /**
  * Search for a book by name to check availability
  * @param {string} name - Book title or identifier to search
- * @returns {Promise} Search results with book status (AVAILABLE, ON_LOAN, etc.)
+ * @returns {Promise} Array of book copies with: { id_book, loan_id, status }
+ *   - id_book: Unique identifier for each copy
+ *   - loan_id: ID of the last loan (null if no history)
+ *   - status: "ON_LOAN" or "RETURNED"
  */
 export async function searchBookByName(name) {
   try {

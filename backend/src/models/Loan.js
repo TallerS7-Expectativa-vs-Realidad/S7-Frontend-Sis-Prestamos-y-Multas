@@ -9,12 +9,14 @@ const { z } = require('zod');
 
 /**
  * DTO for loan search result
- * Represents the availability status of a book
+ * Represents the availability status of a book copy
+ * Note: Each id_book represents a physical copy of the book. Same title + different id_book = different copy.
  */
 const LoanSearchResultDTO = z.object({
-  id: z.number().int().positive('Loan ID must be a positive integer'),
-  name: z.string().min(1, 'Book name is required'),
+  id_book: z.string().min(1, 'Book ID is required'),
+  loan_id: z.number().int().positive().nullable().optional(),
   status: z.enum(['ON_LOAN', 'RETURNED'], 'Status must be ON_LOAN or RETURNED'),
+  message: z.string().optional(),
 });
 
 /**
