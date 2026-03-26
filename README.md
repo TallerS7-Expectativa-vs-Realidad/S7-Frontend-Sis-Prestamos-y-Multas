@@ -222,11 +222,11 @@ Instrucciones para rellenar la plantilla:
 
 - Enlaces: 
     - PR: 
-        - #88
-        - #89
-        - #90
-        - #91
-        - #102
+        - [#88 ci(commitlint): evaluador de Conventional Commits](https://github.com/TallerS7-Expectativa-vs-Realidad/S7-Sistema-de-Prestamos-y-Multas/pull/88)
+        - [#89 Docs/ai](https://github.com/TallerS7-Expectativa-vs-Realidad/S7-Sistema-de-Prestamos-y-Multas/pull/89)
+        - [#90 ai: ajustes de agentes, skills y archivos utilizados para el trabajo con ASDD](https://github.com/TallerS7-Expectativa-vs-Realidad/S7-Sistema-de-Prestamos-y-Multas/pull/90)
+        - [#91 docs: ajustes y correcciones de documentación en SUBTASKS, USER_STORIES y PRD](https://github.com/TallerS7-Expectativa-vs-Realidad/S7-Sistema-de-Prestamos-y-Multas/pull/91)
+        - [#102 feat: implementaciones de HU-02, HU-03 y HU-04 funcionando](https://github.com/TallerS7-Expectativa-vs-Realidad/S7-Sistema-de-Prestamos-y-Multas/pull/102)
     - Branchs
         - ci/github-actions
         - docs/AI
@@ -266,8 +266,8 @@ Instrucciones para rellenar la plantilla:
 
 - Enlaces: 
     - PR: 
-        - #103
-        - #104
+        - [#103 docs(README): planificación de los micro-sprints](https://github.com/TallerS7-Expectativa-vs-Realidad/S7-Sistema-de-Prestamos-y-Multas/pull/103)
+        - [#104 feat: implementaciones de HU-06, HU-01 y HU-05 funcionando](https://github.com/TallerS7-Expectativa-vs-Realidad/S7-Sistema-de-Prestamos-y-Multas/pull/104)
     - Branchs
         - docs/MVP_documentations
         - feat/micro-sprint2
