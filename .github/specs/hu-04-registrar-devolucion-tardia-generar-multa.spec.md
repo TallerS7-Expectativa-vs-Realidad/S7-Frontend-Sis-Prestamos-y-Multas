@@ -3,7 +3,7 @@ id: SPEC-004
 status: APPROVED
 feature: hu-04-registrar-devolucion-tardia-generar-multa
 created: 2026-03-24
-updated: 2026-05-14
+updated: 2026-05-15
 author: spec-generator
 version: "1.0"
 related-specs: [sistema-de-prestamos-y-multas]
@@ -74,9 +74,25 @@ Scenario: Cambio de tramo semanal
 - `debt_reader`: registrar `loan_id, id_reader, name_reader, amount_debt, state_debt (PENDING)`.
 
 ### Endpoint
-PATCH /api/v1/loans (mismo que HU-03)
+PATCH /api/v1/loan (mismo que HU-03)
+
+**Payload (desde frontend):**
+```json
+{
+  "id_book": "BOOK001",
+  "title": "Harry Potter",
+  "date_return": "2026-05-14",
+  "type_id_reader": "CI",
+  "id_reader": "123456",
+  "name_reader": "Juan Pérez",
+  "base_fib_amount": 2.00
+}
+```
+
 - Si se detecta mora, además de actualizar `loan_books`, insertar `debt_reader`.
-- Responses: 200 (RETURNED + deuda creada), 400, 404, 409.
+- `base_fib_amount`: Valor en USD por unidad Fibonacci (enviado por frontend, opcional).
+- Si el frontend no envía `base_fib_amount`, el backend usa el valor por defecto (2.00 USD).
+- Responses: 200 (RETURNED + deuda creada si es tardía), 400, 404, 409.
 
 ### Frontend
 - `ReturnForm` mostrará detalle de la deuda calculada si aplica y confirmación.
@@ -86,14 +102,39 @@ PATCH /api/v1/loans (mismo que HU-03)
 ## 3. LISTA DE TAREAS
 
 ### Backend
-- [ ] Implementar función `calculate_fib_units(days_late)` con tests unitarios.
-- [ ] Al procesar devolución tardía, crear `debt_reader` y persistir `amount_debt` y `state_debt`.
-- [ ] Tests: cálculo Fibonacci, creación de deuda, enlace con loan_id.
+- [x] Implementar función `calculateFibUnits(days_late, baseFibAmount)` con validaciones.
+  - ✅ Función actualizada para aceptar `baseFibAmount` como parámetro
+  - ✅ Usa valor por defecto (2.00 USD) si no se proporciona desde frontend
+  - ✅ Cálculo acumulativo semana por semana
+  - ✅ Retorna `{ units_fib, amount_dept }` correctamente formateado
+- [x] Al procesar devolución tardía, crear `debt_reader` persistiendo datos de mora.
+  - ✅ Esquema de validación `returnLoanSchema` actualizado para aceptar `base_fib_amount`
+  - ✅ `LoanService.returnLoan()` extrae y pasa `base_fib_amount` a `calculateFibUnits`
+  - ✅ Deuda creada con `units_fib` y `amount_dept` correctos
+  - ✅ Estado de deuda: `PENDING`
+  - ✅ Trazabilidad: `loan_id, id_reader, name_reader` registerados
+- [x] Documentación y especificación de cálculo Fibonacci acumulativo.
+  - ✅ Spec actualizada con fórmula acumulativa explícita
+  - ✅ Tabla de referencia con ejemplos (1-42 días)
+  - ✅ Notas en código sobre cálculo semana por semana
+  - ✅ Endpoint documentado con payload incluyendo `base_fib_amount` opcional
 
 ### Frontend
-- [ ] Mostrar resumen de multa al registrar devolución tardía.
-- [ ] Confirmaciones y mensajes claros para el bibliotecario.
+- [x] Mostrar resumen de multa al registrar devolución tardía.
+  - ✅ Componente `DebtSummary` creado con detalles de multa, semanas y monto
+  - ✅ `ReturnForm` actualizado para mostrar DebtSummary cuando hay mora
+  - ✅ Normalización de respuesta backend en `loanService.returnLoan()`
+- [x] Confirmaciones y mensajes claros para el bibliotecario.
+  - ✅ Mensaje de éxito con ID de préstamo
+  - ✅ Información sobre multa cuando aplica
+  - ✅ Mensaje cuando NO hay multa (devolución a tiempo)
+  - ✅ Advertencia sobre limitación de préstamos por deuda pendiente
+- [x] Input para `base_fib_amount` en ReturnForm
+  - ✅ Campo con validación flexible (vacío permitido, sin autocorrección)
+  - ✅ Se envía al backend en payload junto a otros datos
 
 ### QA
-- [ ] Validar con ejemplos del PRD: 1,7,8,15,22 días.
+- [ ] Tests unitarios: cálculo Fibonacci acumulativo con diferentes valores de base_fib_amount.
+- [ ] Tests de integración: flujo completo de devolución tardía y creación de deuda.
+- [ ] Validar con ejemplos del PRD: 1, 7, 8, 15, 22 días y cases de usuario.
 - [ ] Verificar trazabilidad en `loan_books` y `debt_reader`.

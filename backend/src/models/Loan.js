@@ -13,12 +13,13 @@ const createLoanSchema = z.object({
   loan_days: z.enum(['7', '14', '21']).transform(Number),
 });
 
-// Validation schema for loan return (HU-03)
+// Validation schema for loan return (HU-03 and HU-04)
 // Rules:
 // - id_book and id_reader: at least one must be provided (both cannot be null/empty)
 // - name_reader: can be null ONLY if id_book is provided
 // - type_id_reader: always required (CI or DNI)
 // - date_return: always required (format: YYYY-MM-DD)
+// - base_fib_amount: optional, defaults to backend config if not provided (minimum 0.01)
 const returnLoanSchema = z.object({
   date_return: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date_return must be in YYYY-MM-DD format'),
   type_id_reader: z.enum(['CI', 'DNI']).refine(
@@ -28,6 +29,7 @@ const returnLoanSchema = z.object({
   id_book: z.union([z.number().int().positive(), z.string().min(1)]).optional().nullable(),
   id_reader: z.union([z.number().int().positive(), z.string().min(1)]).optional().nullable(),
   name_reader: z.string().optional().nullable(),
+  base_fib_amount: z.number().positive('base_fib_amount must be a positive number').optional(),
 }).refine(
   (data) => {
     // At least one of id_book or id_reader must be provided

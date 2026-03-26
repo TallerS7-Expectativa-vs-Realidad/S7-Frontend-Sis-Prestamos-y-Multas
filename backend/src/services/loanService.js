@@ -88,19 +88,19 @@ class LoanService {
    * If return is late, calculates Fibonacci-based penalty:
    * - days_late = (date_return - date_limit).days
    * - weeks = ((days_late - 1) // 7) + 1
-   * - units_fib = sum(Fibonacci[0..weeks-1])
-   * - amount_dept = units_fib * BASE_FIB_AMOUNT
-   * - Creates dept_reader record with PENDING state
+   * - Uses base_fib_amount from frontend (or default if not provided)
+   * - amount_dept = sum of (Fibonacci[i] * base_fib_amount) for each week
+   * - Creates debt_reader record with PENDING state
    * 
    * Search logic:
    * - If both id_book and id_reader provided: find by both (exact match)
    * - If only id_book provided: find by book (use name_reader to narrow search if provided)
    * - If only id_reader provided: find by reader
    * 
-   * @returns {Object} { loan, debt } where debt is null if no penalty, or debt object if penalty applies
+   * @returns {Object} { loan, debt, days_late } where debt is null if no penalty, or debt object if penalty applies
    */
   async returnLoan(returnData) {
-    const { id_book, id_reader, name_reader, date_return, type_id_reader } = returnData;
+    const { id_book, id_reader, name_reader, date_return, type_id_reader, base_fib_amount } = returnData;
 
     let loan = null;
     
@@ -178,8 +178,11 @@ class LoanService {
     // If late, create debt record
     if (days_late > 0) {
       try {
-        // Calculate Fibonacci units and amount
-        const { units_fib, amount_dept } = this.debtService.calculateFibUnits(days_late);
+        // Calculate Fibonacci units and amount using base_fib_amount from frontend
+        const { units_fib, amount_dept } = this.debtService.calculateFibUnits(
+          days_late,
+          base_fib_amount
+        );
 
         // Create debt record
         debtRecord = await this.debtService.createDebt({

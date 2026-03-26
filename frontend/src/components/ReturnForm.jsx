@@ -78,6 +78,8 @@ export default function ReturnForm() {
   const [dateReturn, setDateReturn] = useState('');
   const [typeIdReader, setTypeIdReader] = useState('DNI');
   const [idReader, setIdReader] = useState('');
+  const [baseFibAmount, setBaseFibAmount] = useState('');
+  const [baseFibError, setBaseFibError] = useState('');
 
   // Validation state
   const [dateError, setDateError] = useState('');
@@ -95,6 +97,38 @@ export default function ReturnForm() {
     setDateError(validationError);
   };
 
+  const handleBaseFibChange = (e) => {
+    // Permite edición libre sin restricciones
+    setBaseFibAmount(e.target.value);
+    setBaseFibError(''); // Limpia error mientras está editando
+  };
+
+  const handleBaseFibBlur = () => {
+    // Si está vacío, dejarlo vacío (sin autocorrección)
+    if (!baseFibAmount || baseFibAmount.trim() === '') {
+      setBaseFibError('');
+      return;
+    }
+
+    const numValue = parseFloat(baseFibAmount);
+
+    // Validar que sea número válido
+    if (isNaN(numValue)) {
+      setBaseFibError('Debe ser un número válido');
+      return;
+    }
+
+    // Validar que sea >= 0.01
+    if (numValue < 0.01) {
+      setBaseFibError('El valor debe ser igual o mayor a 0.01');
+      return;
+    }
+
+    // Valor válido: Formatear a 2 decimales (sin error)
+    setBaseFibAmount(numValue.toFixed(2));
+    setBaseFibError('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -102,6 +136,23 @@ export default function ReturnForm() {
     const dateValidationError = validateReturnDate(dateReturn);
     if (dateValidationError) {
       setDateError(dateValidationError);
+      return;
+    }
+
+    // Validate base fib amount - debe estar lleno y ser válido
+    if (!baseFibAmount || baseFibAmount.trim() === '') {
+      setBaseFibError('La multa base es requerida');
+      return;
+    }
+
+    const numBaseFib = parseFloat(baseFibAmount);
+    if (isNaN(numBaseFib)) {
+      setBaseFibError('Debe ser un número válido');
+      return;
+    }
+
+    if (numBaseFib < 0.01) {
+      setBaseFibError('El valor debe ser igual o mayor a 0.01');
       return;
     }
 
@@ -117,7 +168,8 @@ export default function ReturnForm() {
       title: title || null,
       date_return: dateReturn,
       type_id_reader: typeIdReader,
-      id_reader: idReader || null
+      id_reader: idReader || null,
+      base_fib_amount: parseFloat(baseFibAmount)
     };
 
     const result = await returnLoan(returnData);
@@ -129,8 +181,10 @@ export default function ReturnForm() {
       setDateReturn('');
       setIdReader('');
       setTypeIdReader('DNI');
+      setBaseFibAmount('');
       setDateError('');
       setSearchError('');
+      setBaseFibError('');
     }
   };
 
@@ -141,8 +195,10 @@ export default function ReturnForm() {
     setDateReturn('');
     setIdReader('');
     setTypeIdReader('DNI');
+    setBaseFibAmount('');
     setDateError('');
     setSearchError('');
+    setBaseFibError('');
   };
 
   return (
@@ -256,6 +312,33 @@ export default function ReturnForm() {
           </div>
         </fieldset>
 
+        <fieldset>
+          <legend>Configuración de Multa</legend>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="baseFibAmount">Base de Multa Fibonacci (unidad monetaria) *</label>
+            <input
+              id="baseFibAmount"
+              type="number"
+              value={baseFibAmount}
+              onChange={handleBaseFibChange}
+              onBlur={handleBaseFibBlur}
+              placeholder="Ej: 1.00"
+              min="0.01"
+              step="0.01"
+              required
+            />
+            {baseFibError && (
+              <span className={styles.fieldError}>{baseFibError}</span>
+            )}
+            {!baseFibError && baseFibAmount && (
+              <span className={styles.fieldHint}>
+                Este valor se multiplica por las unidades Fibonacci para calcular la multa total.
+              </span>
+            )}
+          </div>
+        </fieldset>
+
         {searchError && (
           <div className={styles.alert} data-type="error" role="alert">
             {searchError}
@@ -266,7 +349,7 @@ export default function ReturnForm() {
           <button
             type="submit"
             className={styles.submitButton}
-            disabled={isLoading || !!dateError}
+            disabled={isLoading || !!dateError || !!baseFibError}
           >
             {isLoading ? 'Registrando...' : 'Registrar Devolución'}
           </button>
