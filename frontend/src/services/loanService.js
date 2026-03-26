@@ -29,3 +29,25 @@ export async function searchBookByName(name) {
     throw err;
   }
 }
+
+/**
+ * Get list of overdue loans (not returned and past date_limit)
+ * @returns {Promise} Array of overdue loans with book and reader information
+ */
+export async function getOverdueLoans() {
+  try {
+    const res = await axios.get(`${API_BASE}/api/v1/loans/outTime`, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return res.data?.data ?? res.data ?? [];
+  } catch (err) {
+    if (err.response?.status === 404) {
+      // No overdue loans found
+      return [];
+    }
+    throw err;
+  }
+}

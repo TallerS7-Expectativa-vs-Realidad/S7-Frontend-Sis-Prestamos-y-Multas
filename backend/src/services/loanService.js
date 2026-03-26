@@ -86,6 +86,31 @@ class LoanService {
 
     return Array.from(bookMap.values());
   }
+
+  /**
+   * Get all overdue loans (HU-05)
+   * Lists loans where state=ON_LOAN and date_limit < today
+   * 
+   * Business Rules (from spec):
+   * - Exclude loans with state=RETURNED
+   * - Consider overdue: date_limit < today AND state=ON_LOAN
+   * - Output includes: loan_id, id_book, title, state, id_reader, name_reader, date_limit, date_return
+   * 
+   * @returns {Promise<Object>} Response object with overdue loans array
+   * @throws {Error} If database access fails
+   */
+  async getOverdue() {
+    try {
+      const overdueLoans = await this.loanRepository.findOverdue();
+
+      return {
+        data: overdueLoans,
+        count: overdueLoans.length,
+      };
+    } catch (error) {
+      throw new Error(`Error fetching overdue loans: ${error.message}`);
+    }
+  }
 }
 
 module.exports = LoanService;

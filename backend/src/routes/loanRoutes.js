@@ -1,13 +1,38 @@
 /**
- * Loan Routes - HU-01: Book Availability Search
+ * Loan Routes - HU-01: Book Availability Search + HU-05: Overdue Loans
  * 
  * HTTP routes for loan-related operations.
- * Focuses on HU-01: GET /api/v1/loans/{name} to search book availability.
+ * - HU-01: GET /api/v1/loans/{name} to search book availability.
+ * - HU-05: GET /api/v1/loans/outTime to list overdue loans.
  */
 
 module.exports = function makeLoanRouter({ loanService }) {
   const { Router } = require('express');
   const router = Router();
+
+  /**
+   * GET /api/v1/loans/outTime
+   * List all overdue loans (HU-05)
+   * 
+   * Responses:
+   *   - 200 OK: { data: [...], count: number }
+   *   - 500 Internal Server Error: error details
+   * 
+   * Returns loans where state=ON_LOAN and date_limit < today
+   * Includes: loan_id, id_book, title, state, id_reader, name_reader, date_limit, date_return
+   * 
+   * Example:
+   *   GET /api/v1/loans/outTime
+   */
+  router.get('/outTime', async (req, res, next) => {
+    try {
+      const response = await loanService.getOverdue();
+      res.status(200).json(response);
+    } catch (error) {
+      // Delegate to error handler middleware
+      next(error);
+    }
+  });
 
   /**
    * GET /api/v1/loans/{name}

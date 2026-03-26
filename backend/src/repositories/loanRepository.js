@@ -76,6 +76,43 @@ class LoanRepository {
       throw new Error(`Error searching loans by exact title: ${error.message}`);
     }
   }
+
+  /**
+   * Find all overdue loans (HU-05)
+   * Returns loans where state=ON_LOAN and date_limit < today
+   * 
+   * Business Rules:
+   * - Exclude loans with state=RETURNED
+   * - Include only loans where date_limit < today AND state=ON_LOAN
+   * - Return minimal structure: loan_id, id_book, title, state, id_reader, name_reader, date_limit, date_return
+   * 
+   * @returns {Promise<Array>} Array of overdue loan records
+   * @throws {Error} If database query fails
+   */
+  async findOverdue() {
+    try {
+      const query = `
+        SELECT 
+          loan_id,
+          id_book,
+          title,
+          state,
+          id_reader,
+          name_reader,
+          date_limit,
+          date_return
+        FROM loan_books
+        WHERE state = 'ON_LOAN'
+          AND date_limit < CURRENT_DATE
+        ORDER BY date_limit ASC
+      `;
+
+      const result = await this.pool.query(query);
+      return result.rows;
+    } catch (error) {
+      throw new Error(`Error fetching overdue loans: ${error.message}`);
+    }
+  }
 }
 
 module.exports = LoanRepository;
