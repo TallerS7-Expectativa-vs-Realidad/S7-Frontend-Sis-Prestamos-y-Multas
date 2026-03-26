@@ -92,7 +92,20 @@ PATCH /api/v1/loan (mismo que HU-03)
 - Si se detecta mora, además de actualizar `loan_books`, insertar `debt_reader`.
 - `base_fib_amount`: Valor en USD por unidad Fibonacci (enviado por frontend, opcional).
 - Si el frontend no envía `base_fib_amount`, el backend usa el valor por defecto (2.00 USD).
-- Responses: 200 (RETURNED + deuda creada si es tardía), 400, 404, 409.
+- Responses:
+  - 200: Devolución registrada (RETURNED + deuda si es tardía)
+  - 400: `INVALID_PAYLOAD`
+  - 404: `LOAN_NOT_FOUND`
+  - 409: `ALREADY_RETURNED`
+  - 500: `SEARCH_ERROR` | `UPDATE_ERROR` | `DEBT_CREATION_ERROR` | `INTERNAL_SERVER_ERROR`
+
+**Nota de implementación:**
+- Validación de payload → Zod → `INVALID_PAYLOAD` 400
+- Búsqueda de préstamo → LoanService → `LOAN_NOT_FOUND` 404
+- Validación de estado → LoanService → `ALREADY_RETURNED` 409
+- Cálculo Fibonacci acumulativo → DebtService.calculateFibUnits()
+- Creación de deuda → DebtService.createDebt() → `DEBT_CREATION_ERROR` 500 si falla
+- Actualización en BD → LoanRepository → éxito 200 u error 500
 
 ### Frontend
 - `ReturnForm` mostrará detalle de la deuda calculada si aplica y confirmación.

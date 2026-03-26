@@ -1,6 +1,21 @@
 const { z } = require('zod');
 
-// Validation schema for loan creation request
+/**
+ * Validation Schemas for Loan Operations
+ * 
+ * Strategy for error codes:
+ * - Zod handles payload structure validation → returns INVALID_PAYLOAD (400)
+ * - Services handle business logic validation → returns specific codes (INVALID_LOAN_DAYS, etc.)
+ * 
+ * This allows different error responses:
+ * - INVALID_PAYLOAD: for malformed requests (missing fields, wrong types)
+ * - INVALID_LOAN_DAYS: for invalid values (7, 14, 21 only) - HU-02
+ * - BOOK_NOT_AVAILABLE: for business rule violation - HU-02
+ * - READER_HAS_DEBT: for business rule violation - HU-02
+ * - LOAN_NOT_FOUND, ALREADY_RETURNED: for state validation - HU-03/04
+ */
+
+// Validation schema for loan creation request - HU-02
 const createLoanSchema = z.object({
   id_book: z.string().min(1, 'id_book is required'),
   title: z.string().min(1, 'title is required'),
@@ -10,7 +25,14 @@ const createLoanSchema = z.object({
   ),
   id_reader: z.string().min(1, 'id_reader is required'),
   name_reader: z.string().min(1, 'name_reader is required'),
-  loan_days: z.enum(['7', '14', '21']).transform(Number),
+  // NOTE: loan_days validation is intentionally permissive here (not enum)
+  // Specific validation (INVALID_LOAN_DAYS, 400) happens in LoanService.createLoan()
+  // This allows the service to throw the business-specific error code
+  // instead of a generic INVALID_PAYLOAD error
+  loan_days: z.union([z.string(), z.number()]).transform(val => {
+    const numVal = Number(val);
+    return isNaN(numVal) ? val : numVal;
+  }),
 });
 
 // Validation schema for loan return (HU-03 and HU-04)
@@ -18,10 +40,20 @@ const createLoanSchema = z.object({
 // - id_book and id_reader: at least one must be provided (both cannot be null/empty)
 // - name_reader: can be null ONLY if id_book is provided
 // - type_id_reader: always required (CI or DNI)
-// - date_return: always required (format: YYYY-MM-DD)
+// - date_return: always required (format: YYYY-MM-DD and valid calendar date)
 // - base_fib_amount: optional, defaults to backend config if not provided (minimum 0.01)
 const returnLoanSchema = z.object({
-  date_return: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date_return must be in YYYY-MM-DD format'),
+  date_return: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'date_return must be in YYYY-MM-DD format')
+    .refine((dateStr) => {
+      // Validate that it's a real calendar date
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      // Check if date is valid by comparing parsed components
+      return date.getFullYear() === year && 
+             date.getMonth() === month - 1 && 
+             date.getDate() === day;
+    }, 'date_return must be a valid calendar date'),
   type_id_reader: z.enum(['CI', 'DNI']).refine(
     (val) => val !== undefined,
     'type_id_reader must be either CI or DNI'

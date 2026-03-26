@@ -13,7 +13,12 @@ module.exports = function makeLoanRouter({ loanService }) {
    * Register a new book loan for a reader
    * 
    * Body: { id_book, title, type_id_reader, id_reader, name_reader, loan_days }
-   * Response: 201 (success) | 400 (invalid input) | 409 (conflict) | 500 (server error)
+   * 
+   * Response codes:
+   * - 201: Loan created successfully
+   * - 400: INVALID_LOAN_DAYS (loan_days not in [7, 14, 21]) | INVALID_PAYLOAD (other field errors)
+   * - 409: BOOK_NOT_AVAILABLE | READER_HAS_DEBT
+   * - 500: INTERNAL_SERVER_ERROR
    */
   router.post('/', async (req, res, next) => {
     try {
@@ -37,18 +42,19 @@ module.exports = function makeLoanRouter({ loanService }) {
 
   /**
    * PATCH /api/v1/loan
-   * Register the return of a book (HU-03 and HU-04)
+   * Register the return of a book (HU-03 on-time and HU-04 late returns)
    * For on-time returns: closes loan without debt
    * For late returns: closes loan and generates debt
    * 
-   * Body: { date_return, type_id_reader, id_book?, id_reader?, name_reader? }
-   * - date_return: required, ISO 8601 datetime
-   * - type_id_reader: required, 'CI' or 'DNI'
-   * - id_book: optional (but at least one of id_book or id_reader must be provided)
-   * - id_reader: optional (but at least one of id_book or id_reader must be provided)
-   * - name_reader: optional (can be null only if id_book is provided)
+   * Body: { id_book?, id_reader?, name_reader?, date_return, type_id_reader, base_fib_amount? }
+   * At least one of id_book or id_reader must be provided
    * 
-   * Response: 200 (success) | 400 (invalid input) | 404 (loan not found) | 409 (already returned) | 500 (server error)
+   * Response codes:
+   * - 200: Loan returned (RETURNED) with optional debt if late
+   * - 400: INVALID_PAYLOAD (invalid date format, missing required fields, etc.)
+   * - 404: LOAN_NOT_FOUND (no active loan matching criteria)
+   * - 409: ALREADY_RETURNED (loan already returned)
+   * - 500: SEARCH_ERROR | UPDATE_ERROR | DEBT_CREATION_ERROR | INTERNAL_SERVER_ERROR
    * 
    * Success response includes:
    * - loan: Updated loan record (state=RETURNED)

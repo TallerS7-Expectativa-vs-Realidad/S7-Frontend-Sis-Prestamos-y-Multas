@@ -53,13 +53,20 @@ Scenario: Intentar devolver un préstamo no activo
 Actualizar `loan_books`: set `date_return`, `state=RETURNED`.
 
 ### Endpoint
-PATCH /api/v1/loan
-- Body: `{ loan_id, date_return, type_id_reader, id_reader, name_reader }`
+PATCH /api/v1/loan (mismo que HU-04)
+- Body: `{ id_book?, id_reader?, name_reader?, date_return, type_id_reader, base_fib_amount? }`
 - Responses:
-  - 200: préstamo actualizado (RETURNED)
-  - 404: `LOAN_NOT_FOUND`
-  - 409: `ALREADY_RETURNED`
-  - 400: `INVALID_PAYLOAD`
+  - 200: Devolución registrada (RETURNED, sin deuda si es en plazo)
+  - 400: `INVALID_PAYLOAD` (fecha inválida, tipo_id_reader inválido, etc.)
+  - 404: `LOAN_NOT_FOUND` (no existe préstamo activo con los criterios)
+  - 409: `ALREADY_RETURNED` (préstamo ya fue devuelto)
+  - 500: `SEARCH_ERROR` | `UPDATE_ERROR` | `INTERNAL_SERVER_ERROR`
+
+**Nota de implementación:**
+- Validación de payload → Zod → `INVALID_PAYLOAD` 400
+- Búsqueda de préstamo (por id_book, id_reader o ambos) → LoanService → `LOAN_NOT_FOUND` 404
+- Validación de estado (no ya retornado) → LoanService → `ALREADY_RETURNED` 409
+- Actualización en BD → LoanRepository → éxito 200 u error 500
 
 ### Frontend
 - Component: `ReturnForm` — inputs para identificar préstamo y fecha de devolución.

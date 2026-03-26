@@ -2,10 +2,24 @@ const { ZodError } = require('zod');
 
 /**
  * Centralized error handling middleware for Express
- * Handles:
- * - Zod validation errors → 400
- * - Business logic errors (INVALID_LOAN_DAYS, BOOK_NOT_AVAILABLE, READER_HAS_DEBT) → 400/409
- * - Generic errors → 500
+ * 
+ * Error handling strategy:
+ * 1. Zod validation errors (from schema.parse() in routes)
+ *    - Returns 400 with code: 'INVALID_PAYLOAD'
+ *    - Includes detailed field errors
+ * 
+ * 2. Business logic errors (from services)
+ *    - Must have both 'statusCode' and 'code' properties
+ *    - Examples: INVALID_LOAN_DAYS (400), BOOK_NOT_AVAILABLE (409), LOAN_NOT_FOUND (404)
+ *    - Returns statusCode with code and message
+ * 
+ * 3. Unhandled errors
+ *    - Returns 500 with code: 'INTERNAL_SERVER_ERROR'
+ * 
+ * All business logic error codes (set in services):
+ * - HU-02: INVALID_LOAN_DAYS, BOOK_NOT_AVAILABLE, READER_HAS_DEBT
+ * - HU-03/04: LOAN_NOT_FOUND, ALREADY_RETURNED, SEARCH_ERROR, UPDATE_ERROR
+ * - HU-04 only: DEBT_CREATION_ERROR
  */
 module.exports = function errorHandler(err, req, res, next) {
   console.error('Error:', err);

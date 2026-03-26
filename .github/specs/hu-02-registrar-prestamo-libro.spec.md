@@ -81,9 +81,16 @@ Scenario: Intentar registrar un préstamo con plazo no permitido
 POST /api/v1/loan
 - Body: `{ id_book, title, type_id_reader, id_reader, name_reader, loan_days }`
 - Responses:
-  - 201: Loan creado (ver formato)
-  - 400: `INVALID_LOAN_DAYS` | `INVALID_PAYLOAD`
-  - 409: `BOOK_NOT_AVAILABLE` | `READER_HAS_DEBT`
+  - 201: Loan creado exitosamente
+  - 400: `INVALID_LOAN_DAYS` (loan_days ∉ [7, 14, 21]) | `INVALID_PAYLOAD` (otros campos inválidos)
+  - 409: `BOOK_NOT_AVAILABLE` (libro ya en préstamo) | `READER_HAS_DEBT` (lector con deuda pendiente)
+  - 500: `INTERNAL_SERVER_ERROR`
+
+**Nota de implementación:**
+- Validación de payload (campos requeridos, tipos) → Zod → `INVALID_PAYLOAD` 400
+- Validación de `loan_days` (valores 7|14|21) → LoanService → `INVALID_LOAN_DAYS` 400
+- Verificación de disponibilidad libro → LoanService → `BOOK_NOT_AVAILABLE` 409
+- Verificación de deuda lector → LoanService → `READER_HAS_DEBT` 409
 
 ### Frontend
 - Component: `LoanForm` con inputs y select (7/14/21) y cálculo visual de `date_limit`.

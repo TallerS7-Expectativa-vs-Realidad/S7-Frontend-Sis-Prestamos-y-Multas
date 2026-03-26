@@ -10,10 +10,17 @@ class LoanService {
 
   /**
    * Create a new loan with all validations and business rules
-   * Throws errors for:
-   * - INVALID_LOAN_DAYS: loan_days not in [7, 14, 21]
-   * - BOOK_NOT_AVAILABLE: book is already on loan
-   * - READER_HAS_DEBT: reader has a pending debt
+   * Throws specific business logic errors:
+   * - INVALID_LOAN_DAYS (400): loan_days not in [7, 14, 21]
+   * - BOOK_NOT_AVAILABLE (409): book is already on loan
+   * - READER_HAS_DEBT (409): reader has a pending debt
+   * 
+   * These errors are caught by middleware/errorHandler.js which returns
+   * the appropriate HTTP status code and error code to the client.
+   * 
+   * @param {Object} loanData - Validated loan data from Zod schema
+   * @returns {Object} The created loan record
+   * @throws {Error} Custom error with code and statusCode properties
    */
   async createLoan(loanData) {
     // 1. Validate loan_days
@@ -78,26 +85,34 @@ class LoanService {
   }
 
   /**
-   * Register the return of a loan (HU-03 and HU-04)
-   * Validates:
-   * - At least one of id_book or id_reader is provided
-   * - Loan exists (404 if not found or multiple matches)
-   * - Loan is not already returned (409 if already returned)
-   * Updates loan with date_return and state=RETURNED
+   * Register the return of a loan (HU-03 on-time and HU-04 late returns)
+   * Throws specific business logic errors:
+   * - LOAN_NOT_FOUND (404): no active loan found with provided criteria
+   * - ALREADY_RETURNED (409): loan is already in RETURNED state
+   * - SEARCH_ERROR (500): error during database search
+   * - UPDATE_ERROR (500): error updating loan return info
+   * - DEBT_CREATION_ERROR (500): error creating debt (HU-04 only)
    * 
-   * If return is late, calculates Fibonacci-based penalty:
+   * These errors are caught by middleware/errorHandler.js which returns
+   * the appropriate HTTP status code and error code to the client.
+   * 
+   * For late returns (days_late > 0), calculates Fibonacci-based penalty using:
    * - days_late = (date_return - date_limit).days
    * - weeks = ((days_late - 1) // 7) + 1
-   * - Uses base_fib_amount from frontend (or default if not provided)
-   * - amount_dept = sum of (Fibonacci[i] * base_fib_amount) for each week
-   * - Creates debt_reader record with PENDING state
+   * - amount_dept = sum of (Fibonacci[i] * base_fib_amount) for each week (cumulative)
    * 
-   * Search logic:
-   * - If both id_book and id_reader provided: find by both (exact match)
-   * - If only id_book provided: find by book (use name_reader to narrow search if provided)
-   * - If only id_reader provided: find by reader
+   * Search logic (flexible identifier):
+   * - If both id_book and id_reader: find by both (exact match)
+   * - If id_book + name_reader: find by book with reader name narrowing
+   * - If only id_book: find most recent loan for that book
+   * - If only id_reader: find most recent loan for that reader
    * 
-   * @returns {Object} { loan, debt, days_late } where debt is null if no penalty, or debt object if penalty applies
+   * @param {Object} returnData - Validated return data from Zod schema
+   * @returns {Object} { loan, debt, days_late } 
+   *   - loan: updated loan with state=RETURNED
+   *   - debt: null if on-time, debt object if late (HU-04)
+   *   - days_late: number of days past deadline (0 if on-time)
+   * @throws {Error} Custom error with code and statusCode properties
    */
   async returnLoan(returnData) {
     const { id_book, id_reader, name_reader, date_return, type_id_reader, base_fib_amount } = returnData;
