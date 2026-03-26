@@ -243,7 +243,7 @@ Instrucciones para rellenar la plantilla:
 
 | Tarea | Story Points | Tiempo Real (hrs) | Commits / PR | Notas | Día de Sprint |
 |----|--------|--------------:|----------:|-------------------------:|------:|
-| Documentación de planificación del Sprints | - | 1 | - | - | -
+| Documentación de planificación del Sprints | - | 1 | PR: #103 | - | -
 | - | - | - | - | - | -
 | - | - | - | - | - | -
 | - | - | - | - | - | -
