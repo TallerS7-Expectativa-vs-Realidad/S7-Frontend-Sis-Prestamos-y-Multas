@@ -53,14 +53,8 @@ Scenario: Intentar devolver un préstamo no activo
 Actualizar `loan_books`: set `date_return`, `state=RETURNED`.
 
 ### Endpoint
-<<<<<<< HEAD
 PATCH /api/v1/loan
 - Body: `{ loan_id, date_return, type_id_reader, id_reader, name_reader }`
-=======
-PATCH /api/v1/loans
-- Auth: sí
-- Body: `{ date_return, id_book?, type_id_reader?, id_reader?, name_reader? }`
->>>>>>> develop
 - Responses:
   - 200: préstamo actualizado (RETURNED)
   - 404: `LOAN_NOT_FOUND`
@@ -76,7 +70,6 @@ PATCH /api/v1/loans
 ## 3. LISTA DE TAREAS
 
 ### Backend
-<<<<<<< HEAD
 - [x] `LoanRepository.get_by_id(loan_id)` y `update_return(loan_id, date_return)`.
   - Implementados getActiveLoanByBook, getActiveLoanByReader, getActiveLoanByBookAndReader, getActiveLoanByTitleAndReader, getActiveLoanByTitle, updateReturn
 - [x] Validar existencia y estado antes de actualizar.
@@ -85,10 +78,6 @@ PATCH /api/v1/loans
   - Validaciones de estado de préstamo (RETURNED vs ON_LOAN)
 - [x] Endpoint PATCH /api/v1/loan implementado con respuestas 200/404/409/400.
 - [x] Manejo centralizado de errores en middleware.
-=======
-- [ ] `LoanRepository.find_active_loan(criteria)` y `update_return(loan_id, date_return)`.
-- [ ] Validar existencia y estado antes de actualizar.
->>>>>>> develop
 - [ ] Tests: devolución en fecha, devolución no activa, payload inválido.
 
 ### Frontend
