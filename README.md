@@ -199,11 +199,11 @@ ASDD se usará como marco de trabajo y trazabilidad. No obliga a copiar literalm
 | Tarea | Story Points | Tiempo Real (hrs) | Commits / PR | Notas | Día de Sprint |
 |----|--------|--------------:|----------:|-------------------------:|------:|
 | Planificación de trabajo | - | 2 | - | incluye: planificación de micro-sprints, dockerización, creación de repositorio, configuración de repositorio, creación de commitlint. | 1
-| Ajustes de archivos IA (ASDD) | - | 2 | PR: #89 |  | 1
+| Ajustes de archivos IA (ASDD) | - | 4 | PR: #89 |  | 1
 | HU-02 | 5 | 1 | Commit: 302ab56 |  | 2
 | HU-03 | 3 | 1 | Commit: aa3cf10 |  | 2
 | HU-04 | 8 | 2 | Commit: a07ab5a |  | 2
-| Corrección de errores | - | 2 | Commit: d4afc20 | tiempo excedido por razones externar al trabajo | 3 (sprint excedido)
+| Corrección de errores | - | 3 | Commit: d4afc20 | tiempo excedido por razones externar al trabajo | 3 (sprint excedido)
 
 Instrucciones para rellenar la plantilla:
 - `Tarea`: Taréa realizada (una historia de usuario o actividad en concreto del sprint)
@@ -233,8 +233,6 @@ Instrucciones para rellenar la plantilla:
         - docs/asdd-enhanced
         - docs/MVP_documentation
         - feature/implementations
-    
-- Captura/Gráfico (burndown o similar): TODO (pegar imagen o enlace)
 
 - Observaciones finales: Este micro-sprint tuvo tiempos de retrasos surgidos por eventos externos al propio desarrollo del proyecto.
 
@@ -243,12 +241,13 @@ Instrucciones para rellenar la plantilla:
 
 | Tarea | Story Points | Tiempo Real (hrs) | Commits / PR | Notas | Día de Sprint |
 |----|--------|--------------:|----------:|-------------------------:|------:|
-| Documentación de planificación del Sprints | - | 1 | PR: #103 | - | -
-| - | - | - | - | - | -
-| - | - | - | - | - | -
-| - | - | - | - | - | -
-| - | - | - | - | - | -
-| - | - | - | - | - | -
+| Documentación de planificación del Sprints | - | 1 | PR: #103 | - | 1
+| Actualización de Dashboard (Project) | - | 2 | - | - | 1
+| HU-06 | 3 | 1 | Commit: 8c13dd5 | - | 1
+| HU-01 | 3 | 1 | Commit: c88d3a8 | - | 1
+| HU-05 | 3 | 1 | Commit: b400427 | - | 1
+| Corrección de errores | - | 1 | - | - | 1
+
 
 Instrucciones para rellenar la plantilla:
 - `Tarea`: Taréa realizada (una historia de usuario o actividad en concreto del sprint)
@@ -261,15 +260,17 @@ Instrucciones para rellenar la plantilla:
 
 
 - Resumen: 
-
+    - Se actualizó el dashboard (Project) para que representara el flujo y estado actual de desarrollo.
+    - Se creó la documentación con el resumen de los micro-sprints
+    - Implementación de las HU-06, HU-01 y HU-05 con metodología ASDD.
 
 - Enlaces: 
     - PR: 
-        
+        - #103
+        - #104
     - Branchs
         - docs/MVP_documentations
-    
-- Captura/Gráfico (burndown o similar): TODO (pegar imagen o enlace)
+        - feat/micro-sprint2
 
 - Observaciones finales: 
 
