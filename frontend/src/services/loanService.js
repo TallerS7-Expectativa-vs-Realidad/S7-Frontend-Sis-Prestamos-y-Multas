@@ -22,7 +22,17 @@ export async function searchBookByName(name) {
       }
     });
 
-    return res.data?.results ?? res.data;
+    // Extract data array from backend response
+    const dataArray = res.data?.data ?? res.data?.results ?? [];
+    
+    // Map backend fields to frontend fields
+    const mappedResults = Array.isArray(dataArray) ? dataArray.map(item => ({
+      id_book: item.id_book || item.id,
+      loan_id: item.loan_id,
+      status: item.status
+    })) : [];
+
+    return mappedResults;
   } catch (err) {
     // Re-throw error with meaningful classification
     if (err.response?.status === 400) {
@@ -78,11 +88,22 @@ export async function createLoan(loanData) {
 /**
  * Search loans by book name
  * @param {string} name - Book title or fragment
- * @returns {Promise} Search results
+ * @returns {Promise} Search results array
  */
 export async function searchLoanByName(name) {
   const res = await axios.get(`${API_BASE}/api/v1/loans/${encodeURIComponent(name)}`);
-  return res.data;
+  
+  // Extract data array from backend response
+  const dataArray = res.data?.data ?? res.data?.results ?? [];
+  
+  // Map backend fields to frontend fields
+  const mappedResults = Array.isArray(dataArray) ? dataArray.map(item => ({
+    id_book: item.id_book || item.id,
+    loan_id: item.loan_id,
+    status: item.status
+  })) : [];
+
+  return mappedResults;
 }
 
 

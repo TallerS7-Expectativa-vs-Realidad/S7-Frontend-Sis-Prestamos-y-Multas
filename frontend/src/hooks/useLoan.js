@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   createLoan,
   returnLoan as returnLoanService,
-  searchLoanByName,
   searchBookByName as searchBookByNameService, 
   getOverdueLoans as getOverdueLoansService
 } from '../services/loanService.js';
@@ -189,26 +188,8 @@ export function useLoan() {
     setLoanData(null);
   };
 
-  const searchByName2 = async (name) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      return await searchLoanByName(name);
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        'No fue posible consultar la disponibilidad del libro'
-      );
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return {
     searchByName,
-    searchByName2,
     getOverdue,
     register,
     returnLoan,
