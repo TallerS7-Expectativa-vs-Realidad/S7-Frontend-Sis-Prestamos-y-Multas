@@ -109,11 +109,11 @@ class DebtRepository {
   /**
    * Get latest debt for a reader with optional filters
    * Filters by: typeId (optional), id_reader (required), name_reader (optional)
-   * Returns the most recent debt record (PENDING or PAID)
+   * Returns only PENDING debt records as per HU-06 requirements
    */
   async getDebtByReaderWithFilters(filters) {
     try {
-      let query = 'SELECT * FROM debt_reader WHERE 1=1';
+      let query = 'SELECT * FROM debt_reader WHERE state_debt = \'PENDING\'';
       const values = [];
       let paramCount = 1;
 
