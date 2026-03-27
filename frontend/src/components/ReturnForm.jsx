@@ -78,7 +78,7 @@ export default function ReturnForm() {
   const [dateReturn, setDateReturn] = useState('');
   const [typeIdReader, setTypeIdReader] = useState('DNI');
   const [idReader, setIdReader] = useState('');
-  const [baseFibAmount, setBaseFibAmount] = useState('');
+  const [baseFibAmount, setBaseFibAmount] = useState('1');
   const [baseFibError, setBaseFibError] = useState('');
 
   // Validation state
@@ -139,20 +139,21 @@ export default function ReturnForm() {
       return;
     }
 
-    let parsedBaseFibAmount;
-    if (baseFibAmount && baseFibAmount.trim() !== '') {
-      const numBaseFib = parseFloat(baseFibAmount);
-      if (isNaN(numBaseFib)) {
-        setBaseFibError('Debe ser un número válido');
-        return;
-      }
+    // Validate baseFibAmount is required and not empty
+    if (!baseFibAmount || baseFibAmount.trim() === '') {
+      setBaseFibError('La multa base es obligatoria');
+      return;
+    }
 
-      if (numBaseFib < 0.01) {
-        setBaseFibError('El valor debe ser igual o mayor a 0.01');
-        return;
-      }
+    const numBaseFib = parseFloat(baseFibAmount);
+    if (isNaN(numBaseFib)) {
+      setBaseFibError('Debe ser un número válido');
+      return;
+    }
 
-      parsedBaseFibAmount = numBaseFib;
+    if (numBaseFib < 0.01) {
+      setBaseFibError('El valor debe ser igual o mayor a 0.01');
+      return;
     }
 
     // Validate search criteria
@@ -168,11 +169,8 @@ export default function ReturnForm() {
       date_return: dateReturn,
       type_id_reader: typeIdReader,
       id_reader: idReader || null,
+      base_fib_amount: numBaseFib,
     };
-
-    if (parsedBaseFibAmount !== undefined) {
-      returnData.base_fib_amount = parsedBaseFibAmount;
-    }
 
     const result = await returnLoan(returnData);
 
@@ -183,7 +181,7 @@ export default function ReturnForm() {
       setDateReturn('');
       setIdReader('');
       setTypeIdReader('DNI');
-      setBaseFibAmount('');
+      setBaseFibAmount('1');
       setDateError('');
       setSearchError('');
       setBaseFibError('');
@@ -197,7 +195,7 @@ export default function ReturnForm() {
     setDateReturn('');
     setIdReader('');
     setTypeIdReader('DNI');
-    setBaseFibAmount('');
+    setBaseFibAmount('1');
     setDateError('');
     setSearchError('');
     setBaseFibError('');
