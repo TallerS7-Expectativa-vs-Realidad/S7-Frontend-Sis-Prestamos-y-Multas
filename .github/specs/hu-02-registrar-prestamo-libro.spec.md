@@ -5,7 +5,7 @@ feature: hu-02-registrar-prestamo-libro
 created: 2026-03-24
 updated: 2026-03-25
 author: spec-generator
-version: "1.0"
+version: "1.1"
 related-specs: [sistema-de-prestamos-y-multas]
 ---
 
@@ -79,12 +79,18 @@ Scenario: Intentar registrar un préstamo con plazo no permitido
 
 ### Endpoint
 POST /api/v1/loans
-- Auth: sí
 - Body: `{ id_book, title, type_id_reader, id_reader, name_reader, loan_days }`
 - Responses:
-  - 201: Loan creado (ver formato)
-  - 400: `INVALID_LOAN_DAYS` | `INVALID_PAYLOAD`
-  - 409: `BOOK_NOT_AVAILABLE` | `READER_HAS_DEBT`
+  - 201: Loan creado exitosamente
+  - 400: `INVALID_LOAN_DAYS` (loan_days ∉ [7, 14, 21]) | `INVALID_PAYLOAD` (otros campos inválidos)
+  - 409: `BOOK_NOT_AVAILABLE` (libro ya en préstamo) | `READER_HAS_DEBT` (lector con deuda pendiente)
+  - 500: `INTERNAL_SERVER_ERROR`
+
+**Nota de implementación:**
+- Validación de payload (campos requeridos, tipos) → Zod → `INVALID_PAYLOAD` 400
+- Validación de `loan_days` (valores 7|14|21) → LoanService → `INVALID_LOAN_DAYS` 400
+- Verificación de disponibilidad libro → LoanService → `BOOK_NOT_AVAILABLE` 409
+- Verificación de deuda lector → LoanService → `READER_HAS_DEBT` 409
 
 ### Frontend
 - Component: `LoanForm` con inputs y select (7/14/21) y cálculo visual de `date_limit`.
@@ -94,15 +100,18 @@ POST /api/v1/loans
 
 ## 3. LISTA DE TAREAS
 
-### Backend
-- [ ] Validaciones `loan_days` y tipos de id.
-- [ ] `LoanRepository.insert_loan` y verificación de disponibilidad.
-- [ ] `DebtRepository.get_latest_by_reader` para validar bloqueo.
-- [ ] Tests: creación éxito, libro no disponible, lector con deuda, lector rehabilitado y plazo inválido.
+### Backend ✅ COMPLETADO
+- [x] Validaciones `loan_days` y tipos de id. (Zod schema en `models/Loan.js`)
+- [x] `LoanRepository.insert_loan` y verificación de disponibilidad. (Implementado)
+- [x] `DebtRepository.get_latest_by_reader` para validar bloqueo. (Implementado)
+- [x] Servicio con lógica de negocio (LoanService: validación + orquestación)
+- [x] Rutas HTTP POST /api/v1/loans y GET /api/v1/loans/:name (loanRoutes.js)
+- [x] Auto-inicialización de base de datos (src/db/initialize.js)
+- [ ] Tests: creación éxito, libro no disponible, lector con deuda.
 
 ### Frontend
-- [ ] `LoanForm` + cálculo visual de fecha límite.
-- [ ] Manejo de errores 400/409/500.
+- [x] `LoanForm` + cálculo visual de fecha límite.
+- [x] Manejo de errores 400/409/500.
 
 ### QA
 - [ ] Datos: libro disponible, lector habilitado, lector con deuda.

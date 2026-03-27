@@ -299,8 +299,9 @@ Si todas las comprobaciones pasan, entonces se guarda en la tabla "loan_books" l
 inputs necesarios: 
     - [input] id del libro (integer)
     - [input] nombre del libro (string)
-    - [select] selector de DNI o Cédula (opciones: DNI o Cédula)
+    - [select] selector de DNI o Cédula (opciones: DNI o CI)
     - [input] id del lector (integer) 
+    - [input] multa base (real)     
 
 uno de los siguientes inputs puede estar vacío
     - [input] id del libro (integer)
@@ -464,7 +465,7 @@ Ambos pueden estar con datos, pero no pueden estar vacíos o nulos los dos campo
  
 nombre del libro puede ser nulo solo si se define el la id del libro.
  
-input de multa base no puede estar vacío
+input de multa base puede quedar vacío. Si no se informa, el backend usa el valor por defecto definido por la biblioteca.
 
 Cada input debe tener un placeholder de ejemplo : \
 id del libro = 000000 \
@@ -697,7 +698,7 @@ Elementos importantes:
 
 ---
 
-#### TDEV05-02: Endpoint GET api/v1/loans/outTime
+#### TDEV05-02: Endpoint GET api/v1/loans/overdue
 
 el endpoint no recibe parámetros, solo tiene una tarea no configurable. Traer todos los préstamos con fechas límites excedidas en orden alfabético según el título del libro
 

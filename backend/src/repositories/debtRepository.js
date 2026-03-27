@@ -1,0 +1,110 @@
+/**
+ * DebtRepository
+ * Handles all database operations related to reader debts
+ */
+class DebtRepository {
+  constructor(pool) {
+    this.pool = pool;
+  }
+
+  /**
+   * Get the latest pending debt for a reader
+   * Returns the most recent PENDING debt record if it exists
+   */
+  async getLatestPendingDebtByReader(id_reader) {
+    try {
+      const query = `
+        SELECT * FROM debt_reader 
+        WHERE id_reader = $1 AND state_debt = 'PENDING'
+        ORDER BY created_at DESC 
+        LIMIT 1
+      `;
+
+      const result = await this.pool.query(query, [id_reader]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error getting debt by reader: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get all pending debts for a reader
+   */
+  async getAllPendingDebtsByReader(id_reader) {
+    try {
+      const query = `
+        SELECT * FROM debt_reader 
+        WHERE id_reader = $1 AND state_debt = 'PENDING'
+        ORDER BY created_at DESC
+      `;
+
+      const result = await this.pool.query(query, [id_reader]);
+      return result.rows;
+    } catch (error) {
+      throw new Error(`Error getting all debts by reader: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get a debt by ID
+   */
+  async getDebtById(id_debt) {
+    try {
+      const query = 'SELECT * FROM debt_reader WHERE id_debt = $1';
+      const result = await this.pool.query(query, [id_debt]);
+      return result.rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error getting debt by ID: ${error.message}`);
+    }
+  }
+
+  /**
+   * Create a new debt record
+   */
+  async createDebt(debtData) {
+    try {
+      const {
+        loan_id,
+        type_id_reader,
+        id_reader,
+        name_reader,
+        units_fib,
+        amount_debt,
+      } = debtData;
+
+      const query = `
+        INSERT INTO debt_reader 
+        (loan_id, type_id_reader, id_reader, name_reader, units_fib, amount_debt, state_debt, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, 'PENDING', NOW(), NOW())
+        RETURNING *
+      `;
+
+      const values = [loan_id, type_id_reader, id_reader, name_reader, units_fib, amount_debt];
+      const result = await this.pool.query(query, values);
+      return result.rows[0];
+    } catch (error) {
+      throw new Error(`Error creating debt: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update debt payment status
+   */
+  async markDebtAsPaid(id_debt) {
+    try {
+      const query = `
+        UPDATE debt_reader 
+        SET state_debt = 'PAID', updated_at = NOW()
+        WHERE id_debt = $1
+        RETURNING *
+      `;
+
+      const result = await this.pool.query(query, [id_debt]);
+      return result.rows[0];
+    } catch (error) {
+      throw new Error(`Error marking debt as paid: ${error.message}`);
+    }
+  }
+}
+
+module.exports = DebtRepository;
