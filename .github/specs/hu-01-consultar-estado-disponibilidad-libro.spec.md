@@ -82,7 +82,6 @@ Scenario: Consultar un libro con múltiples copias
 
 ### Endpoint
 GET /api/v1/loans/{name}
-- Auth: sí
 - Path: `name` (string)
 - Responses:
   - 200: `{ "results": [ { "id_book": string, "loan_id": integer, "status": "RETURNED"|"ON_LOAN", "message"?: string } ], "message"?: string }`
@@ -101,12 +100,13 @@ GET /api/v1/loans/{name}
 ## 3. LISTA DE TAREAS
 
 ### Backend
-- [ ] Implementar `LoanRepository.find_by_name(name)` (case-insensitive).
-- [ ] Implementar router `GET /api/v1/loans/{name}`.
+- [x] Implementar `LoanRepository.findByName(name)` (case-insensitive).
+- [x] Implementar router `GET /api/v1/loans/{name}`.
 - [ ] Tests: búsqueda exitosa, nombre inválido, libro sin historial, libro con préstamo activo.
 
 ### Frontend
 - [ ] `LoanSearch` component + integración con hook/service.
+- [x] `useLoan.searchByName(name)` integrado con `GET /api/v1/loans/{name}`.
 - [ ] Validaciones UI (campo no vacío).
 - [ ] E2E/Unit tests UI mocks.
 

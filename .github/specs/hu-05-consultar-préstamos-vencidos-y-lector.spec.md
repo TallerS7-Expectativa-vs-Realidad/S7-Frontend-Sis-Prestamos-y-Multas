@@ -47,13 +47,13 @@ Scenario: Consultar préstamos vencidos
 ## 2. DISEÑO
 
 ### Endpoint
-GET /api/v1/loans/outTime
-- Auth: sí
-- Response 200: list of `{ loan_id, id_book, title, state, id_reader, name_reader, date_limit, date_return }`
+GET /api/v1/loans/overdue
+- Query params: none en el MVP
+- Response 200: list of `{ loan_id, id_book, title, state, type_id_reader, id_reader, name_reader, date_limit, date_return }`
 
 ### Frontend
-- Page: `OverduePage` (`/loans/outTime`) con tabla simple.
-- Hook: `useLoan.getOverdue()` → `GET /api/v1/loans/outTime`.
+- Page: `OverduePage` (`/loans/overdue`) con tabla simple.
+- Hook: `useLoan.getOverdue()` → `GET /api/v1/loans/overdue`.
 
 ---
 

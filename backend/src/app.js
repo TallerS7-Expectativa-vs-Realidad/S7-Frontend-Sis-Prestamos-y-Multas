@@ -39,18 +39,20 @@ module.exports = function makeApp(pool) {
 
   // Services (depend on repositories)
   const debtService = new DebtService(debtRepository);
-  const loanService = new LoanService(loanRepository);
+  const loanService = new LoanService(loanRepository, debtService);
 
   // Routers (depend on services)
   const debtRouter = makeDebtRouter({ debtService });
   const loanRouter = makeLoanRouter({ loanService });
   const readersRouter = makeReadersRouter({ debtService });
+  
 
   // ============================================================
   // ROUTE REGISTRATION
   // ============================================================
   app.use('/api/v1/debt', debtRouter);
   app.use('/api/v1/debts', debtRouter);
+  app.use('/api/v1/loan', loanRouter);
   app.use('/api/v1/loans', loanRouter);
   app.use('/api/v1/readers', readersRouter);
 

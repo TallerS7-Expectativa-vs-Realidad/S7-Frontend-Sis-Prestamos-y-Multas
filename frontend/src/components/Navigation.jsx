@@ -15,7 +15,7 @@ export default function Navigation() {
         <li>
           <Link
             to="/loan"
-            className={`${styles.navLink} ${isActive('/loan') ? styles.active : ''}`}
+            className={`${styles.navLink} ${isActive('/loan') || isActive('/') ? styles.active : ''}`}
           >
             Registrar Préstamo
           </Link>
