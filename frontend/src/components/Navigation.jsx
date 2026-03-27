@@ -28,6 +28,22 @@ export default function Navigation() {
             Registrar Devolución
           </Link>
         </li>
+        <li>
+          <Link
+            to="/loans/outTime"
+            className={`${styles.navLink} ${isActive('/loans/outTime') ? styles.active : ''}`}
+          >
+            Préstamos Vencidos
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/payment"
+            className={`${styles.navLink} ${isActive('/payment') ? styles.active : ''}`}
+          >
+            Pagar Multa
+          </Link>
+        </li>
       </ul>
     </nav>
   );
