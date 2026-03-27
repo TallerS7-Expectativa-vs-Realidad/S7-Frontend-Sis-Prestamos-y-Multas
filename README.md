@@ -246,7 +246,9 @@ Instrucciones para rellenar la plantilla:
 | HU-06 | 3 | 1 | Commit: 8c13dd5 | - | 1
 | HU-01 | 3 | 1 | Commit: c88d3a8 | - | 1
 | HU-05 | 3 | 1 | Commit: b400427 | - | 1
-| Corrección de errores | - | 1 | - | - | 1
+| Corrección de errores | - | 2 | - | - | 1 y 2
+| Solución de conflictos de integración (merges) | - | 4 | - | conflictos de código surgidos en los pull request por el trabajo en paralelo de distintas ramas | 2
+
 
 
 Instrucciones para rellenar la plantilla:
@@ -263,6 +265,7 @@ Instrucciones para rellenar la plantilla:
     - Se actualizó el dashboard (Project) para que representara el flujo y estado actual de desarrollo.
     - Se creó la documentación con el resumen de los micro-sprints
     - Implementación de las HU-06, HU-01 y HU-05 con metodología ASDD.
+    - Se realizó el merge de las ramas de trabajo de los micro sprints (feature/micro-sprint2 y feature/implementations)
 
 - Enlaces: 
     - PR: 
@@ -270,7 +273,7 @@ Instrucciones para rellenar la plantilla:
         - [#104 feat: implementaciones de HU-06, HU-01 y HU-05 funcionando](https://github.com/TallerS7-Expectativa-vs-Realidad/S7-Sistema-de-Prestamos-y-Multas/pull/104)
     - Branchs
         - docs/MVP_documentations
-        - feat/micro-sprint2
+        - feature/micro-sprint2
 
 - Observaciones finales: 
 
