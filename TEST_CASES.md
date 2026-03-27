@@ -1,0 +1,115 @@
+# TEST_CASES
+
+## HU-02 - Registrar préstamo de un libro a un lector habilitado
+
+### Fuente de verdad
+
+- Spec aprobada: `.github/specs/hu-02-registrar-prestamo-libro.spec.md`
+- Historia base: `USER_STORIES.md`
+
+### Cobertura priorizada
+
+- Smoke y crítico: `TC-HU02-01`
+- Crítico de negocio: `TC-HU02-03`
+- Altos de validación y bloqueo: `TC-HU02-02`, `TC-HU02-04`
+
+### Datos base sugeridos
+
+| Alias | Datos | Uso |
+| --- | --- | --- |
+| `BOOK-AVAILABLE-01` | `id_book=B-1001`, `title=Cien años de soledad` | Flujo exitoso |
+| `BOOK-ON-LOAN-01` | `id_book=B-1002`, `title=1984`, último estado `ON_LOAN` | Libro no disponible |
+| `BOOK-AVAILABLE-02` | `id_book=B-1003`, `title=El principito` | Rechazo por deuda |
+| `BOOK-AVAILABLE-03` | `id_book=B-1004`, `title=Rayuela` | Rechazo por plazo inválido |
+| `READER-ENABLED-01` | `type_id_reader=CI`, `id_reader=R-2001`, `name_reader=Ana Torres`, sin deuda `PENDING` | Flujo exitoso y plazo inválido |
+| `READER-ENABLED-02` | `type_id_reader=DNI`, `id_reader=R-2002`, `name_reader=Carlos Rojas`, sin deuda `PENDING` | Libro ya prestado |
+| `READER-BLOCKED-01` | `type_id_reader=CI`, `id_reader=R-2003`, `name_reader=Laura Díaz`, deuda más reciente `PENDING` | Lector bloqueado |
+
+### Matriz HU-02
+
+| Historia de Usuario asociada | ID del Caso | Escenario Gherkin | Precondiciones | Datos de entrada | Pasos de ejecución | Resultado esperado | Resultado obtenido | Estado | Prioridad |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| HU-02 | `TC-HU02-01` | Dado que el libro está disponible y el lector no tiene deuda pendiente.<br>Cuando el bibliotecario registra el préstamo con `loan_days=7`.<br>Entonces el sistema crea el préstamo, calcula `date_limit` y deja el libro en `ON_LOAN`. | `BOOK-AVAILABLE-01` sin préstamo activo.<br>`READER-ENABLED-01` sin deuda pendiente. | `BOOK-AVAILABLE-01`.<br>`READER-ENABLED-01`.<br>`loan_days=7`. | 1. Enviar `POST /api/v1/loans`.<br>2. Verificar la respuesta HTTP.<br>3. Consultar `loan_books`.<br>4. Validar `state`, `date_return` y `date_limit`. | `HTTP 201`.<br>Se crea un nuevo registro en `loan_books`.<br>El préstamo queda con `state=ON_LOAN`, `date_return=null`, `loan_days=7`.<br>`date_limit` corresponde a fecha de registro + 7 días. | `Sin ejecutar` | `Sin ejecutar` | Crítico |
+| HU-02 | `TC-HU02-02` | Dado que el libro ya tiene un préstamo activo.<br>Cuando el bibliotecario intenta registrar un nuevo préstamo.<br>Entonces el sistema rechaza la operación y no crea un nuevo préstamo. | `BOOK-ON-LOAN-01` con último estado `ON_LOAN`.<br>`READER-ENABLED-02` sin deuda pendiente. | `BOOK-ON-LOAN-01`.<br>`READER-ENABLED-02`.<br>`loan_days=14`. | 1. Confirmar el estado activo del libro en historial.<br>2. Enviar `POST /api/v1/loans`.<br>3. Verificar código de respuesta.<br>4. Confirmar ausencia de inserción adicional en `loan_books`. | `HTTP 409`.<br>Código esperado `BOOK_NOT_AVAILABLE`.<br>No se crea nuevo registro en `loan_books`. | `Sin ejecutar` | `Sin ejecutar` | Alto |
+| HU-02 | `TC-HU02-03` | Dado que el libro está disponible y el lector tiene una deuda pendiente.<br>Cuando el bibliotecario intenta registrar el préstamo.<br>Entonces el sistema rechaza la operación y no crea el préstamo. | `BOOK-AVAILABLE-02` disponible.<br>`READER-BLOCKED-01` con deuda más reciente `PENDING`. | `BOOK-AVAILABLE-02`.<br>`READER-BLOCKED-01`.<br>`loan_days=21`. | 1. Confirmar deuda pendiente del lector.<br>2. Enviar `POST /api/v1/loans`.<br>3. Verificar la respuesta HTTP.<br>4. Confirmar que no hubo inserción en `loan_books`. | `HTTP 409`.<br>Código esperado `READER_HAS_DEBT`.<br>No se crea nuevo registro en `loan_books`. | `Sin ejecutar` | `Sin ejecutar` | Crítico |
+| HU-02 | `TC-HU02-04` | Dado que el libro está disponible y el lector no tiene deuda pendiente.<br>Cuando el bibliotecario registra un préstamo con un plazo no permitido.<br>Entonces el sistema rechaza la operación y no crea el préstamo. | `BOOK-AVAILABLE-03` disponible.<br>`READER-ENABLED-01` sin deuda pendiente. | `BOOK-AVAILABLE-03`.<br>`READER-ENABLED-01`.<br>`loan_days=10`. | 1. Enviar `POST /api/v1/loans` con `loan_days=10`.<br>2. Verificar la respuesta HTTP.<br>3. Consultar `loan_books`.<br>4. Confirmar que no se creó un registro para `B-1004`. | `HTTP 400`.<br>Código esperado `INVALID_LOAN_DAYS`.<br>No se crea nuevo registro en `loan_books`. | `Sin ejecutar` | `Sin ejecutar` | Alto |
+
+## HU-03 - Registrar devolución de un libro dentro del plazo
+
+### Fuente de verdad
+
+- Spec aprobada: `.github/specs/hu-03-registrar-devolucion-en-plazo.spec.md`
+- Historia base: `USER_STORIES.md`
+
+### Cobertura priorizada
+
+- Smoke y crítico de borde: `TC-HU03-02`
+- Happy path principal: `TC-HU03-01`
+- Altos de rechazo: `TC-HU03-03`, `TC-HU03-04`
+
+### Datos base sugeridos
+
+| Alias | Datos | Uso |
+| --- | --- | --- |
+| `LOAN-ACTIVE-EARLY-01` | `loan_id=L-3001`, `id_book=B-1101`, `id_reader=R-2101`, `type_id_reader=CI`, `state=ON_LOAN`, `date_limit=2026-04-10` | Devolución antes del límite |
+| `LOAN-ACTIVE-ON-LIMIT-01` | `loan_id=L-3002`, `id_book=B-1102`, `id_reader=R-2102`, `type_id_reader=DNI`, `state=ON_LOAN`, `date_limit=2026-04-10` | Borde exacto de `date_limit` |
+| `BOOK-WITHOUT-ACTIVE-LOAN-01` | `id_book=B-1103`, `id_reader=R-2103`, sin fila activa `ON_LOAN` | No existe préstamo activo |
+| `LOAN-ALREADY-RETURNED-01` | `loan_id=L-3004`, `id_book=B-1104`, `id_reader=R-2104`, último estado `RETURNED`, `date_return` informado | Devolución duplicada |
+
+### Matriz HU-03
+
+| Historia de Usuario asociada | ID del Caso | Escenario Gherkin | Precondiciones | Datos de entrada | Pasos de ejecución | Resultado esperado | Resultado obtenido | Estado | Prioridad |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| HU-03 | `TC-HU03-01` | Dado que existe un préstamo activo.<br>Cuando el bibliotecario registra la devolución antes de `date_limit`.<br>Entonces el sistema cierra el préstamo sin generar deuda. | `LOAN-ACTIVE-EARLY-01` con `state=ON_LOAN` y `date_limit=2026-04-10`. | `id_book=B-1101`.<br>`id_reader=R-2101`.<br>`type_id_reader=CI`.<br>`date_return=2026-04-08`. | 1. Enviar `PATCH /api/v1/loans`.<br>2. Verificar la respuesta HTTP.<br>3. Consultar `loan_books`.<br>4. Confirmar ausencia de nueva deuda en `debt_reader`. | `HTTP 200`.<br>El mismo préstamo queda con `state=RETURNED`.<br>`date_return=2026-04-08`.<br>`days_late=0` o equivalente.<br>No se crea deuda nueva. | `Sin ejecutar` | `Sin ejecutar` | Alto |
+| HU-03 | `TC-HU03-02` | Dado que existe un préstamo activo.<br>Cuando el bibliotecario registra la devolución el mismo día de `date_limit`.<br>Entonces el sistema cierra el préstamo, no genera deuda y el libro vuelve a quedar disponible. | `LOAN-ACTIVE-ON-LIMIT-01` con `state=ON_LOAN` y `date_limit=2026-04-10`. | `id_book=B-1102`.<br>`id_reader=R-2102`.<br>`type_id_reader=DNI`.<br>`date_return=2026-04-10`. | 1. Enviar `PATCH /api/v1/loans`.<br>2. Verificar la respuesta HTTP.<br>3. Confirmar actualización del préstamo en `loan_books`.<br>4. Confirmar que no se creó deuda en `debt_reader`. | `HTTP 200`.<br>El préstamo queda en `RETURNED`.<br>`date_return=2026-04-10`.<br>No se crea deuda nueva.<br>El último estado del libro queda `RETURNED`, por lo tanto vuelve a estar disponible. | `Sin ejecutar` | `Sin ejecutar` | Crítico |
+| HU-03 | `TC-HU03-03` | Dado que no existe un préstamo activo para el libro o lector consultado.<br>Cuando el bibliotecario intenta registrar la devolución.<br>Entonces el sistema rechaza la operación y no altera historial ni deuda. | `BOOK-WITHOUT-ACTIVE-LOAN-01` sin fila activa `ON_LOAN`. | `id_book=B-1103`.<br>`id_reader=R-2103`.<br>`type_id_reader=CI`.<br>`date_return=2026-04-10`. | 1. Enviar `PATCH /api/v1/loans`.<br>2. Verificar el código de respuesta.<br>3. Consultar `loan_books`.<br>4. Confirmar ausencia de nueva deuda en `debt_reader`. | `HTTP 404`.<br>Código esperado `LOAN_NOT_FOUND`.<br>Sin cambios en `loan_books`.<br>Sin deuda nueva. | `Sin ejecutar` | `Sin ejecutar` | Alto |
+| HU-03 | `TC-HU03-04` | Dado que el préstamo ya fue devuelto.<br>Cuando el bibliotecario intenta registrar nuevamente la devolución.<br>Entonces el sistema rechaza la operación y no altera historial ni deuda. | `LOAN-ALREADY-RETURNED-01` con último estado `RETURNED` y `date_return` informado. | `id_book=B-1104`.<br>`id_reader=R-2104`.<br>`type_id_reader=CI`.<br>`date_return=2026-04-11`. | 1. Enviar `PATCH /api/v1/loans` con los mismos identificadores.<br>2. Verificar el código de respuesta.<br>3. Confirmar que no hubo una nueva actualización en `loan_books`.<br>4. Confirmar que no se creó deuda en `debt_reader`. | `HTTP 409`.<br>Código esperado `ALREADY_RETURNED`.<br>No se modifica `loan_books`.<br>No se crea deuda nueva. | `Sin ejecutar` | `Sin ejecutar` | Alto |
+
+## HU-04 - Registrar devolución tardía y generar multa Fibonacci
+
+### Fuente de verdad
+
+- Spec aprobada: `.github/specs/hu-04-registrar-devolucion-tardia-generar-multa.spec.md`
+- Reglas base: `PRD.md`
+- Casos obligatorios de mora: `1`, `7`, `8`, `15` y `22` días
+
+### Cobertura priorizada
+
+- Smoke y críticos del cálculo: `TC-HU04-01`, `TC-HU04-02`, `TC-HU04-03`
+- Altos de cambio de tramo: `TC-HU04-04`, `TC-HU04-05`
+
+### Matriz de referencia Fibonacci
+
+| Días de mora | Semanas esperadas | Unidades Fibonacci esperadas | `amount_debt` esperado con `base_fib_amount=2.00` |
+| --- | --- | --- | --- |
+| `1` | `1` | `1` | `2.00` |
+| `7` | `1` | `1` | `2.00` |
+| `8` | `2` | `2` | `4.00` |
+| `15` | `3` | `4` | `8.00` |
+| `22` | `4` | `7` | `14.00` |
+
+### Datos base sugeridos
+
+| Alias | Datos | Uso |
+| --- | --- | --- |
+| `LOAN-LATE-01D-01` | `loan_id=L-4001`, `id_book=B-1201`, `id_reader=R-2201`, `type_id_reader=CI`, `state=ON_LOAN`, `date_limit=2026-04-10` | Mora de 1 día |
+| `LOAN-LATE-07D-01` | `loan_id=L-4002`, `id_book=B-1202`, `id_reader=R-2202`, `type_id_reader=DNI`, `state=ON_LOAN`, `date_limit=2026-04-10` | Mora de 7 días |
+| `LOAN-LATE-08D-01` | `loan_id=L-4003`, `id_book=B-1203`, `id_reader=R-2203`, `type_id_reader=CI`, `state=ON_LOAN`, `date_limit=2026-04-10` | Mora de 8 días |
+| `LOAN-LATE-15D-01` | `loan_id=L-4004`, `id_book=B-1204`, `id_reader=R-2204`, `type_id_reader=CC`, `state=ON_LOAN`, `date_limit=2026-04-10` | Mora de 15 días |
+| `LOAN-LATE-22D-01` | `loan_id=L-4005`, `id_book=B-1205`, `id_reader=R-2205`, `type_id_reader=TI`, `state=ON_LOAN`, `date_limit=2026-04-10` | Mora de 22 días |
+
+### Matriz HU-04
+
+| Historia de Usuario asociada | ID del Caso | Escenario Gherkin | Precondiciones | Datos de entrada | Pasos de ejecución | Resultado esperado | Resultado obtenido | Estado | Prioridad |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| HU-04 | `TC-HU04-01` | Dado que existe un préstamo activo vencido.<br>Cuando el bibliotecario registra la devolución con 1 día de mora.<br>Entonces el sistema cierra el préstamo y crea una deuda `PENDING` equivalente a 1 unidad Fibonacci. | `LOAN-LATE-01D-01` en `ON_LOAN`.<br>No existe deuda previa para ese `loan_id`. | `id_book=B-1201`.<br>`id_reader=R-2201`.<br>`type_id_reader=CI`.<br>`date_return=2026-04-11`.<br>`base_fib_amount=2.00`. | 1. Enviar `PATCH /api/v1/loans`.<br>2. Verificar la respuesta HTTP.<br>3. Confirmar cierre del préstamo en `loan_books`.<br>4. Confirmar creación de deuda en `debt_reader`. | `HTTP 200`.<br>`state=RETURNED`.<br>`days_late=1`.<br>`units_fib=1`.<br>`amount_debt=2.00`.<br>La deuda queda en `PENDING` y trazable al `loan_id`. | `Sin ejecutar` | `Sin ejecutar` | Crítico |
+| HU-04 | `TC-HU04-02` | Dado que existe un préstamo activo vencido.<br>Cuando el bibliotecario registra la devolución con 7 días de mora.<br>Entonces el sistema mantiene el tramo de semana 1 y crea deuda acumulada de 1 unidad Fibonacci. | `LOAN-LATE-07D-01` en `ON_LOAN`.<br>No existe deuda previa para ese `loan_id`. | `id_book=B-1202`.<br>`id_reader=R-2202`.<br>`type_id_reader=DNI`.<br>`date_return=2026-04-17`.<br>`base_fib_amount=2.00`. | 1. Enviar `PATCH /api/v1/loans`.<br>2. Verificar la respuesta HTTP.<br>3. Confirmar cierre del préstamo.<br>4. Confirmar deuda creada en `debt_reader`. | `HTTP 200`.<br>`days_late=7`.<br>`weeks=1`.<br>`units_fib=1`.<br>`amount_debt=2.00`.<br>No debe saltar a semana 2. | `Sin ejecutar` | `Sin ejecutar` | Crítico |
+| HU-04 | `TC-HU04-03` | Dado que existe un préstamo activo vencido.<br>Cuando el bibliotecario registra la devolución con 8 días de mora.<br>Entonces el sistema cambia al tramo de semana 2 y crea deuda acumulada de 2 unidades Fibonacci. | `LOAN-LATE-08D-01` en `ON_LOAN`.<br>No existe deuda previa para ese `loan_id`. | `id_book=B-1203`.<br>`id_reader=R-2203`.<br>`type_id_reader=CI`.<br>`date_return=2026-04-18`.<br>`base_fib_amount=2.00`. | 1. Enviar `PATCH /api/v1/loans`.<br>2. Verificar la respuesta HTTP.<br>3. Confirmar cierre del préstamo.<br>4. Confirmar deuda creada en `debt_reader`. | `HTTP 200`.<br>`days_late=8`.<br>`weeks=2`.<br>`units_fib=2`.<br>`amount_debt=4.00`. | `Sin ejecutar` | `Sin ejecutar` | Crítico |
+| HU-04 | `TC-HU04-04` | Dado que existe un préstamo activo vencido.<br>Cuando el bibliotecario registra la devolución con 15 días de mora.<br>Entonces el sistema cambia al tramo de semana 3 y crea deuda acumulada de 4 unidades Fibonacci. | `LOAN-LATE-15D-01` en `ON_LOAN`.<br>No existe deuda previa para ese `loan_id`. | `id_book=B-1204`.<br>`id_reader=R-2204`.<br>`type_id_reader=CC`.<br>`date_return=2026-04-25`.<br>`base_fib_amount=2.00`. | 1. Enviar `PATCH /api/v1/loans`.<br>2. Verificar la respuesta HTTP.<br>3. Confirmar cierre del préstamo.<br>4. Confirmar deuda creada en `debt_reader`. | `HTTP 200`.<br>`days_late=15`.<br>`weeks=3`.<br>`units_fib=4`.<br>`amount_debt=8.00`. | `Sin ejecutar` | `Sin ejecutar` | Alto |
+| HU-04 | `TC-HU04-05` | Dado que existe un préstamo activo vencido.<br>Cuando el bibliotecario registra la devolución con 22 días de mora.<br>Entonces el sistema cambia al tramo de semana 4 y crea deuda acumulada de 7 unidades Fibonacci. | `LOAN-LATE-22D-01` en `ON_LOAN`.<br>No existe deuda previa para ese `loan_id`. | `id_book=B-1205`.<br>`id_reader=R-2205`.<br>`type_id_reader=TI`.<br>`date_return=2026-05-02`.<br>`base_fib_amount=2.00`. | 1. Enviar `PATCH /api/v1/loans`.<br>2. Verificar la respuesta HTTP.<br>3. Confirmar cierre del préstamo.<br>4. Confirmar deuda creada en `debt_reader`. | `HTTP 200`.<br>`days_late=22`.<br>`weeks=4`.<br>`units_fib=7`.<br>`amount_debt=14.00`. | `Sin ejecutar` | `Sin ejecutar` | Alto |
+
+## Lista rápida para sub-tareas en GitHub Projects
+
+- HU-02: `TC-HU02-01`, `TC-HU02-02`, `TC-HU02-03`, `TC-HU02-04`
+- HU-03: `TC-HU03-01`, `TC-HU03-02`, `TC-HU03-03`, `TC-HU03-04`
+- HU-04: `TC-HU04-01`, `TC-HU04-02`, `TC-HU04-03`, `TC-HU04-04`, `TC-HU04-05`
