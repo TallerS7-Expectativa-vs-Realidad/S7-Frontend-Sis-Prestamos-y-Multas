@@ -2,12 +2,13 @@ const express = require('express');
 const corsMiddleware = require('./middleware/corsMiddleware');
 const requestLogger = require('./middleware/requestLogger');
 const errorHandler = require('./middleware/errorHandler');
-const LoanRepository = require('./repositories/loanRepository');
 const DebtRepository = require('./repositories/debtRepository');
-const LoanService = require('./services/loanService');
 const DebtService = require('./services/DebtService');
-const makeLoanRouter = require('./routes/loanRoutes');
+const LoanRepository = require('./repositories/loanRepository');
+const LoanService = require('./services/loanService');
 const makeDebtRouter = require('./routes/debtRoutes');
+const makeLoanRouter = require('./routes/loanRoutes');
+const makeReadersRouter = require('./routes/readersRoutes');
 
 /**
  * Factory function to create and configure the Express app
@@ -33,24 +34,27 @@ module.exports = function makeApp(pool) {
   // in the correct order and injects them as dependencies
 
   // Repositories (depend on database pool)
-  const loanRepository = new LoanRepository(pool);
   const debtRepository = new DebtRepository(pool);
+  const loanRepository = new LoanRepository(pool);
 
   // Services (depend on repositories)
   const debtService = new DebtService(debtRepository);
   const loanService = new LoanService(loanRepository, debtService);
 
   // Routers (depend on services)
-  const loanRouter = makeLoanRouter({ loanService });
   const debtRouter = makeDebtRouter({ debtService });
+  const loanRouter = makeLoanRouter({ loanService });
+  const readersRouter = makeReadersRouter({ debtService });
+  
 
   // ============================================================
   // ROUTE REGISTRATION
   // ============================================================
-  app.use('/api/v1/loan', loanRouter);
-  app.use('/api/v1/loans', loanRouter);
   app.use('/api/v1/debt', debtRouter);
   app.use('/api/v1/debts', debtRouter);
+  app.use('/api/v1/loan', loanRouter);
+  app.use('/api/v1/loans', loanRouter);
+  app.use('/api/v1/readers', readersRouter);
 
   // ============================================================
   // ERROR HANDLING MIDDLEWARE

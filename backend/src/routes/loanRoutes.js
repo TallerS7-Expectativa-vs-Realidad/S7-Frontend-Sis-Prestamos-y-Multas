@@ -1,13 +1,56 @@
+/**
+ * Loan Routes - HU-01: Book Availability Search + HU-05: Overdue Loans
+ * 
+ * HTTP routes for loan-related operations.
+ * - HU-01: GET /api/v1/loans/{name} to search book availability.
+ * - HU-05: GET /api/v1/loans/outTime to list overdue loans.
+ */
 const { Router } = require('express');
 const { createLoanSchema, returnLoanSchema } = require('../models/Loan');
 
-/**
- * Factory function to create loan router with injected service
- * Follows dependency injection pattern as per backend.instructions.md
- */
+
 module.exports = function makeLoanRouter({ loanService }) {
   const router = Router();
 
+  /**
+   * GET /api/v1/loans/outTime
+   * List all overdue loans (HU-05)
+   * 
+   * Responses:
+   *   - 200 OK: { data: [...], count: number }
+   *   - 500 Internal Server Error: error details
+   * 
+   * Returns loans where state=ON_LOAN and date_limit < today
+   * Includes: loan_id, id_book, title, state, id_reader, name_reader, date_limit, date_return
+   * 
+   * Example:
+   *   GET /api/v1/loans/outTime
+   */
+  router.get('/outTime', async (req, res, next) => {
+    try {
+      const response = await loanService.getOverdue();
+      res.status(200).json(response);
+    } catch (error) {
+      // Delegate to error handler middleware
+      next(error);
+    }
+  });
+  
+    /**
+   * GET /api/v1/loans/{name}
+   * Search for book availability by title (case-insensitive)
+   * 
+   * Path Parameters:
+   *   - name (string): Book title to search for
+   * 
+   * Responses:
+   *   - 200 OK: { results: [...], message?: string }
+   *   - 304 Bad Request: { message: "INVALID_NAME" }
+   * 
+   * Examples:
+   *   GET /api/v1/loans/Harry%20Potter
+   *   GET /api/v1/loans/the%20hobbit
+   */
   router.get('/:name', async (req, res, next) => {
     try {
       const result = await loanService.searchAvailabilityByName(req.params.name);
@@ -22,8 +65,11 @@ module.exports = function makeLoanRouter({ loanService }) {
     }
   });
 
+
+
+
   /**
-    * POST /api/v1/loans
+   * POST /api/v1/loans
    * Register a new book loan for a reader
    * 
    * Body: { id_book, title, type_id_reader, id_reader, name_reader, loan_days }
