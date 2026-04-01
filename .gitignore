@@ -1,4 +1,4 @@
 /node_modules
-.env.local
-.env.example
+./.env.local
+./.env.example
 package-lock.json
