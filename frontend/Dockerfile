@@ -17,5 +17,13 @@ RUN npm run build
 FROM nginx:stable-alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Copy entrypoint script for dynamic API URL configuration
+COPY docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 80
+
+LABEL org.opencontainers.image.source=https://github.com/TallerS7-Expectativa-vs-Realidad/S7-Frontend-Sis-Prestamos-y-Multas
+
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
