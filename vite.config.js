@@ -18,7 +18,7 @@ export default defineConfig({
     css: { modules: { classNameStrategy: 'non-scoped' } },
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'json-summary', 'html'],
       include: ['src/**/*.{js,jsx}'],
       exclude: [
         'src/**/*.test.{js,jsx}',
