@@ -7,15 +7,17 @@ RUN npm install
 
 COPY . .
 
-# Allow the Vite build to embed the API URL at build-time
-ARG VITE_API_URL
+ARG VITE_API_URL=http://localhost:3000
 ENV VITE_API_URL=${VITE_API_URL}
 
 RUN npm run build
 
-### Production stage: serve with nginx
+
 FROM nginx:stable-alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
+
+LABEL org.opencontainers.image.source=https://github.com/TallerS7-Expectativa-vs-Realidad/S7-Frontend-Sis-Prestamos-y-Multas
+
 CMD ["nginx", "-g", "daemon off;"]

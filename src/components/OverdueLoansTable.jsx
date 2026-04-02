@@ -1,27 +1,36 @@
 import { useState, useEffect } from 'react';
+import { AlertTriangle, BookOpen, RefreshCw, AlertCircle } from 'lucide-react';
 import { useLoan } from '../hooks/useLoan.js';
 import styles from './OverdueLoansTable.module.css';
 
 /**
- * OverdueLoansTable Component
- * Displays a table of overdue loans with book and reader information
- * @returns {JSX.Element} Table component
+ * Calculate days overdue from today vs date_limit
  */
+function calculateDaysOverdue(dateLimitStr) {
+  if (!dateLimitStr) return 0;
+  const limit = new Date(dateLimitStr);
+  const today = new Date();
+  limit.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  const diff = today - limit;
+  return diff > 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) : 0;
+}
+
 export default function OverdueLoansTable() {
   const { getOverdue, isLoading, error, overdueLoans } = useLoan();
   const [displayData, setDisplayData] = useState([]);
 
-  useEffect(() => {
-    const fetchOverdueLoans = async () => {
-      const loans = await getOverdue();
-      setDisplayData(loans || []);
-    };
+  const fetchData = async () => {
+    const loans = await getOverdue();
+    setDisplayData(loans || []);
+  };
 
-    fetchOverdueLoans();
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const formatDate = (dateString) => {
-    if (!dateString) return '-';
+    if (!dateString) return '—';
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString('es-ES');
@@ -31,17 +40,42 @@ export default function OverdueLoansTable() {
   };
 
   if (isLoading) {
-    return <div className={styles.loading}>Cargando préstamos vencidos...</div>;
+    return (
+      <div className={styles.loading} aria-live="polite" aria-label="Cargando préstamos vencidos">
+        <div className={styles.skeleton}>
+          <div className={styles.skeletonRow} />
+          <div className={styles.skeletonRow} />
+          <div className={styles.skeletonRow} />
+          <div className={styles.skeletonRow} />
+          <div className={styles.skeletonRow} />
+        </div>
+        <span>Cargando préstamos vencidos...</span>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className={styles.error}>Error: {error}</div>;
+    return (
+      <div className={styles.errorState} role="alert">
+        <AlertCircle size={48} aria-hidden={true} className={styles.errorIcon} />
+        <h3 className={styles.errorHeading}>No se pudieron cargar los préstamos vencidos</h3>
+        <p className={styles.errorText}>Verifica tu conexión e intenta de nuevo.</p>
+        <button className={styles.retryBtn} onClick={fetchData}>
+          <RefreshCw size={16} aria-hidden={true} />
+          Reintentar
+        </button>
+      </div>
+    );
   }
 
   if (!displayData || displayData.length === 0) {
     return (
       <div className={styles.emptyState}>
-        <p>No hay préstamos vencidos en este momento</p>
+        <BookOpen size={48} aria-hidden={true} className={styles.emptyIcon} />
+        <h3 className={styles.emptyTitle}>No hay préstamos vencidos</h3>
+        <p className={styles.emptyText}>
+          Todos los préstamos están dentro del plazo o ya fueron devueltos.
+        </p>
       </div>
     );
   }
@@ -51,25 +85,51 @@ export default function OverdueLoansTable() {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>ID Préstamo</th>
-            <th>Libro</th>
-            <th>Estado</th>
-            <th>Lector</th>
-            <th>Fecha Límite</th>
-            <th>Fecha Devolución</th>
+            <th scope="col">ID Préstamo</th>
+            <th scope="col">Libro</th>
+            <th scope="col">Lector Responsable</th>
+            <th scope="col" className={styles.alignCenter}>Estado</th>
+            <th scope="col">Fecha Límite</th>
+            <th scope="col" className={styles.alignRight}>Días de Atraso</th>
           </tr>
         </thead>
         <tbody>
-          {displayData.map((loan) => (
-            <tr key={loan.loan_id}>
-              <td>{loan.loan_id}</td>
-              <td>{loan.title}</td>
-              <td><span className={styles.badge}>{loan.state}</span></td>
-              <td>{loan.name_reader}</td>
-              <td>{formatDate(loan.date_limit)}</td>
-              <td>{formatDate(loan.date_return)}</td>
-            </tr>
-          ))}
+          {displayData.map((loan) => {
+            const daysOverdue = calculateDaysOverdue(loan.date_limit);
+            return (
+              <tr key={loan.loan_id}>
+                <td className={styles.cellMono}>{loan.loan_id}</td>
+                <td>
+                  <div className={styles.compositeCell}>
+                    <span className={styles.primaryText}>{loan.title}</span>
+                    {loan.id_book && <span className={styles.secondaryText}>{loan.id_book}</span>}
+                  </div>
+                </td>
+                <td>
+                  <div className={styles.compositeCell}>
+                    <span className={styles.primaryText}>{loan.name_reader}</span>
+                    {loan.id_reader && (
+                      <span className={styles.secondaryText}>
+                        {loan.type_id_reader ? `${loan.type_id_reader} ` : ''}{loan.id_reader}
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className={styles.alignCenter}>
+                  <span className={styles.badge}>
+                    <AlertTriangle size={14} aria-hidden={true} />
+                    Vencido
+                  </span>
+                </td>
+                <td className={styles.cellMono}>{formatDate(loan.date_limit)}</td>
+                <td className={styles.alignRight}>
+                  <span className={styles.daysOverdue}>
+                    {daysOverdue} {daysOverdue === 1 ? 'día' : 'días'}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       <div className={styles.info}>

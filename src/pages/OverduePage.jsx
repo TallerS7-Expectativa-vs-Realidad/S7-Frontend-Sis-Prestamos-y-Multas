@@ -10,7 +10,7 @@ export default function OverduePage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h2>Préstamos Vencidos</h2>
+        <h1 className={styles.title}>Préstamos Vencidos</h1>
         <p className={styles.subtitle}>
           Libros fuera de plazo y lector responsable
         </p>

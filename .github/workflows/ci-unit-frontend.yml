@@ -1,5 +1,4 @@
 name: frontend - Unit Tests
-
 on:
   workflow_call:
 

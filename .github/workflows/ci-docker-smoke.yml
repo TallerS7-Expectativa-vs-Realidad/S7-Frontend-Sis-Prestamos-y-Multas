@@ -1,4 +1,4 @@
-name: frontend - Docker Smoke Tests
+name: Docker Smoke Tests
 
 on:
   workflow_call:
@@ -60,3 +60,25 @@ jobs:
           docker rm frontend-smoke-test || true
           docker rmi s7-frontend:smoke-test || true
           echo "✓ Cleanup completed"
+
+      - name: Show container status
+        if: always()
+        run: docker compose ps
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Shutdown services
+        if: always()
+        run: docker compose down -v
+
+  create-issue-on-failure:
+    name: Create Issue on Failure
+    needs: [docker-smoke]
+    if: failure()
+    uses: ./.github/workflows/create-issue-on-failure.yml
+    with:
+      test-type: 'docker-smoke'
+      service-name: 'infrastructure'
+      workflow-name: 'Docker Smoke Tests'

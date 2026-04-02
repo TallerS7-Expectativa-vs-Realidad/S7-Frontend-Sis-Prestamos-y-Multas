@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Search, CircleCheck, CircleX, BookOpen, AlertCircle } from 'lucide-react';
 import styles from './LoanSearch.module.css';
 import { useLoan } from '../hooks/useLoan.js';
 
@@ -11,12 +12,15 @@ export default function LoanSearch() {
   const { searchByName, isLoading, error, searchResults } = useLoan();
   const [bookName, setBookName] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [validationError, setValidationError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setHasSearched(false);
+    setValidationError('');
 
     if (!bookName.trim()) {
+      setValidationError('Ingresa el nombre del libro para buscar.');
       return;
     }
 
@@ -31,68 +35,77 @@ export default function LoanSearch() {
   const handleClear = () => {
     setBookName('');
     setHasSearched(false);
+    setValidationError('');
   };
 
-  /**
-   * Determine book status display text
-   * @param {string} status - Book status (ON_LOAN, RETURNED)
-   * @returns {string} Display text
-   */
-  const getStatusDisplay = (status) => {
+  const getStatusBadge = (status) => {
     switch (status) {
       case 'ON_LOAN':
-        return 'Préstamo Activo';
+        return (
+          <span className={`${styles.statusBadge} ${styles.statusOnLoan}`}>
+            <CircleX size={16} aria-hidden={true} />
+            Préstamo Activo
+          </span>
+        );
       case 'RETURNED':
-        return 'Disponible';
+        return (
+          <span className={`${styles.statusBadge} ${styles.statusAvailable}`}>
+            <CircleCheck size={16} aria-hidden={true} />
+            Disponible
+          </span>
+        );
       default:
-        return status || 'Desconocido';
-    }
-  };
-
-  /**
-   * Determine status badge class
-   * @param {string} status - Book status
-   * @returns {string} CSS class name
-   */
-  const getStatusClass = (status) => {
-    switch (status) {
-      case 'ON_LOAN':
-        return styles.statusOnLoan;
-      case 'RETURNED':
-        return styles.statusAvailable;
-      default:
-        return styles.statusUnknown;
+        return (
+          <span className={`${styles.statusBadge} ${styles.statusNoHistory}`}>
+            <BookOpen size={16} aria-hidden={true} />
+            Sin historial — Disponible
+          </span>
+        );
     }
   };
 
   return (
     <div className={styles.container}>
-      <h2>Consultar Disponibilidad de Libro</h2>
+      <h2 className={styles.heading}>Consultar Disponibilidad de Libro</h2>
 
       {/* Search Form */}
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className={styles.formCard}>
         <div className={styles.formGroup}>
-          <label htmlFor="bookName">Nombre del Libro *</label>
+          <label htmlFor="bookName" className={styles.label}>Nombre del Libro</label>
           <input
             id="bookName"
             type="text"
             value={bookName}
-            onChange={(e) => setBookName(e.target.value)}
-            placeholder="Ej: La Casa de los Espíritus"
+            onChange={(e) => { setBookName(e.target.value); setValidationError(''); }}
+            placeholder="ej. Don Quijote"
             disabled={isLoading}
-            required
+            className={styles.input}
+            aria-describedby={validationError ? 'bookName-error' : undefined}
           />
+          {validationError && (
+            <span id="bookName-error" className={styles.fieldError}>{validationError}</span>
+          )}
         </div>
 
         <div className={styles.buttonGroup}>
-          <button type="submit" disabled={isLoading || !bookName.trim()}>
-            {isLoading ? 'Buscando...' : 'Buscar'}
+          <button type="submit" className={styles.primaryBtn} disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <span className={styles.spinner} aria-hidden="true"></span>
+                Buscando...
+              </>
+            ) : (
+              <>
+                <Search size={16} aria-hidden={true} />
+                Buscar
+              </>
+            )}
           </button>
           <button
             type="button"
             onClick={handleClear}
             disabled={isLoading}
-            className={styles.secondaryButton}
+            className={styles.secondaryBtn}
           >
             Limpiar
           </button>
@@ -101,49 +114,54 @@ export default function LoanSearch() {
 
       {/* Error Message */}
       {error && (
-        <div className={styles.alert} data-type="error" role="alert">
+        <div className={styles.alertError} role="alert">
+          <AlertCircle size={20} aria-hidden={true} />
           {error}
         </div>
       )}
 
-      {/* Search Results */}
+      {/* Loading announcement  */}
+      {isLoading && (
+        <div aria-live="polite" className={styles.srOnly}>Buscando libro...</div>
+      )}
+
+      {/* Search Results — Table */}
       {hasSearched && searchResults && searchResults.length > 0 && (
-        <div className={styles.resultsContainer}>
-          <h3>Resultados de la Búsqueda</h3>
-          <div className={styles.resultsList}>
-            {searchResults.map((result) => (
-              <div key={result.id_book} className={styles.resultCard}>
-                <div className={styles.resultHeader}>
-                  <div className={styles.titleSection}>
-                    <h4>Copia #{result.id_book}</h4>
-                    <p className={styles.copyId}>ID de copia: {result.id_book}</p>
-                  </div>
-                  <span className={`${styles.statusBadge} ${getStatusClass(result.status)}`}>
-                    {getStatusDisplay(result.status)}
-                  </span>
-                </div>
-                <div className={styles.resultDetails}>
-                  <p>
-                    <strong>Estado:</strong>{' '}
-                    {result.status === 'ON_LOAN' ? 'No disponible (préstamo activo)' : 'Disponible'}
-                  </p>
-                  {result.loan_id && (
-                    <p>
-                      <strong>Préstamo ID:</strong> {result.loan_id}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className={styles.resultsSection}>
+          <p className={styles.resultsSummary}>
+            {searchResults.length} copia(s) encontrada(s) para '{bookName}'
+          </p>
+          <table className={styles.resultsTable}>
+            <thead>
+              <tr>
+                <th scope="col">ID Copia</th>
+                <th scope="col" className={styles.alignRight}>ID Préstamo</th>
+                <th scope="col" className={styles.alignCenter}>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {searchResults.map((result) => (
+                <tr key={result.id_book}>
+                  <td className={styles.codeCell}>{result.id_book}</td>
+                  <td className={`${styles.codeCell} ${styles.alignRight}`}>
+                    {result.loan_id ?? '—'}
+                  </td>
+                  <td className={styles.alignCenter}>{getStatusBadge(result.status)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
       {/* No Results Message */}
       {hasSearched && searchResults && searchResults.length === 0 && (
-        <div className={styles.alert} data-type="info">
-          No se encontraron registros para "{bookName}". El libro no registra historial de
-          préstamo y se considera disponible para préstamo.
+        <div className={styles.emptyState}>
+          <BookOpen size={48} aria-hidden={true} className={styles.emptyIcon} />
+          <h3 className={styles.emptyHeading}>Sin resultados para '{bookName}'</h3>
+          <p className={styles.emptyText}>
+            No se encontraron libros con ese nombre. Verifica el nombre e intenta de nuevo.
+          </p>
         </div>
       )}
     </div>
