@@ -1,31 +1,31 @@
 .page {
   display: flex;
   flex-direction: column;
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 1280px;
   width: 100%;
 }
 
 .header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-8);
 }
 
-.header h2 {
-  font-size: 2rem;
-  color: #333;
-  margin: 0 0 0.5rem 0;
-  font-weight: 700;
+.title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2) 0;
 }
 
 .subtitle {
-  color: #666;
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .content {
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  width: 100%;
 }

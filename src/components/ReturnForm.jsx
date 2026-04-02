@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { BookOpen, Search, AlertCircle, CheckCircle } from 'lucide-react';
 import styles from './ReturnForm.module.css';
 import { useLoan } from '../hooks/useLoan.js';
 import DebtSummary from './DebtSummary.jsx';
@@ -23,143 +24,104 @@ function getTodayDate() {
   return today.toISOString().split('T')[0];
 }
 
-/**
- * Validate that return date is not in the future
- * @param {string} dateStr - ISO date string
- * @returns {string} Error message or empty string if valid
- */
-function validateReturnDate(dateStr) {
-  if (!dateStr) {
-    return 'Return date is required';
-  }
-  
-  const returnDate = new Date(dateStr);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  returnDate.setHours(0, 0, 0, 0);
-
-  if (returnDate > today) {
-    return 'Return date cannot be in the future';
-  }
-
-  return '';
-}
-
-/**
- * Validate search criteria for book return
- * @param {string} idBook - Book ID
- * @param {string} title - Book title
- * @param {string} idReader - Reader ID
- * @returns {string} Error message or empty string if valid
- */
-function validateSearchCriteria(idBook, title, idReader) {
-  // At least one of idBook or idReader must be provided
-  if (!idBook && !idReader) {
-    return 'Debe proporcionar ID del libro o ID del lector';
-  }
-
-  // If idBook is provided, title can be empty or have value
-  // If idBook is NOT provided, title must be empty (not used)
-  
-  // If idBook is NOT provided but title has value, it's an error
-  if (!idBook && title) {
-    return 'El nombre del libro solo puede usarse si proporciona el ID del libro';
-  }
-
-  return '';
-}
-
 export default function ReturnForm() {
   const { returnLoan, isLoading, error, success, loanData, reset } = useLoan();
+  const idBookRef = useRef(null);
 
   // Form fields
   const [idBook, setIdBook] = useState('');
   const [title, setTitle] = useState('');
-  const [dateReturn, setDateReturn] = useState('');
-  const [typeIdReader, setTypeIdReader] = useState('DNI');
+  const [typeIdReader, setTypeIdReader] = useState('CI');
   const [idReader, setIdReader] = useState('');
+  const [dateReturn, setDateReturn] = useState('');
   const [baseFibAmount, setBaseFibAmount] = useState('1');
-  const [baseFibError, setBaseFibError] = useState('');
 
   // Validation state
   const [dateError, setDateError] = useState('');
   const [searchError, setSearchError] = useState('');
+  const [baseFibError, setBaseFibError] = useState('');
+  const [businessError, setBusinessError] = useState(null);
 
-  // Get max date (today)
   const maxDate = getTodayDate();
 
   const handleDateChange = (e) => {
     const value = e.target.value;
     setDateReturn(value);
-    
-    // Validate immediately
-    const validationError = validateReturnDate(value);
-    setDateError(validationError);
+    if (value) {
+      const returnDate = new Date(value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      returnDate.setHours(0, 0, 0, 0);
+      if (returnDate > today) {
+        setDateError('La fecha de devolución no puede ser posterior a hoy.');
+      } else {
+        setDateError('');
+      }
+    } else {
+      setDateError('');
+    }
   };
 
   const handleBaseFibChange = (e) => {
-    // Permite edición libre sin restricciones
     setBaseFibAmount(e.target.value);
-    setBaseFibError(''); // Limpia error mientras está editando
+    setBaseFibError('');
   };
 
   const handleBaseFibBlur = () => {
-    // Si está vacío, dejarlo vacío (sin autocorrección)
     if (!baseFibAmount || baseFibAmount.trim() === '') {
       setBaseFibError('');
       return;
     }
-
     const numValue = parseFloat(baseFibAmount);
-
-    // Validar que sea número válido
     if (isNaN(numValue)) {
-      setBaseFibError('Debe ser un número válido');
+      setBaseFibError('Debe ser un número válido.');
       return;
     }
-
-    // Validar que sea >= 0.01
     if (numValue < 0.01) {
-      setBaseFibError('El valor debe ser igual o mayor a 0.01');
+      setBaseFibError('El valor debe ser igual o mayor a 0.01.');
       return;
     }
-
-    // Valor válido: Formatear a 2 decimales (sin error)
     setBaseFibAmount(numValue.toFixed(2));
     setBaseFibError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setBusinessError(null);
+    setSearchError('');
 
-    // Validate date first
-    const dateValidationError = validateReturnDate(dateReturn);
-    if (dateValidationError) {
-      setDateError(dateValidationError);
+    // Validate date
+    if (!dateReturn) {
+      setDateError('Este campo es obligatorio.');
+      return;
+    }
+    const returnDate = new Date(dateReturn);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    returnDate.setHours(0, 0, 0, 0);
+    if (returnDate > today) {
+      setDateError('La fecha de devolución no puede ser posterior a hoy.');
       return;
     }
 
-    // Validate baseFibAmount is required and not empty
+    // Validate baseFibAmount
     if (!baseFibAmount || baseFibAmount.trim() === '') {
-      setBaseFibError('La multa base es obligatoria');
+      setBaseFibError('La multa base es obligatoria.');
       return;
     }
-
     const numBaseFib = parseFloat(baseFibAmount);
     if (isNaN(numBaseFib)) {
-      setBaseFibError('Debe ser un número válido');
+      setBaseFibError('Debe ser un número válido.');
       return;
     }
-
     if (numBaseFib < 0.01) {
-      setBaseFibError('El valor debe ser igual o mayor a 0.01');
+      setBaseFibError('El valor debe ser igual o mayor a 0.01.');
       return;
     }
 
-    // Validate search criteria
-    const searchValidationError = validateSearchCriteria(idBook, title, idReader);
-    if (searchValidationError) {
-      setSearchError(searchValidationError);
+    // Validate smart-search: at least idBook or idReader
+    if (!idBook.trim() && !idReader.trim()) {
+      setSearchError('Ingresa al menos el ID del libro o la identificación del lector.');
       return;
     }
 
@@ -174,18 +136,20 @@ export default function ReturnForm() {
 
     const result = await returnLoan(returnData);
 
-    if (result) {
-      // Clear form on success
+    if (result && (!result.days_late || result.days_late === 0)) {
+      // On-time return: reset form
       setIdBook('');
       setTitle('');
       setDateReturn('');
       setIdReader('');
-      setTypeIdReader('DNI');
+      setTypeIdReader('CI');
       setBaseFibAmount('1');
       setDateError('');
       setSearchError('');
       setBaseFibError('');
+      if (idBookRef.current) idBookRef.current.focus();
     }
+    // Late return: do NOT reset — show DebtSummary
   };
 
   const handleReset = () => {
@@ -194,76 +158,126 @@ export default function ReturnForm() {
     setTitle('');
     setDateReturn('');
     setIdReader('');
-    setTypeIdReader('DNI');
+    setTypeIdReader('CI');
     setBaseFibAmount('1');
     setDateError('');
     setSearchError('');
     setBaseFibError('');
+    setBusinessError(null);
+    if (idBookRef.current) idBookRef.current.focus();
   };
 
   return (
     <div className={styles.formContainer}>
-      <h2>Registrar Devolución de Libro</h2>
+      <h2 className={styles.heading}>Registrar Devolución de Libro</h2>
 
       {error && (
-        <div className={styles.alert} data-type="error" role="alert">
+        <div className={styles.alertError} role="alert">
+          <AlertCircle size={20} aria-hidden={true} />
           {error}
         </div>
       )}
 
-      {success && loanData && (
-        <div className={styles.alert} data-type="success" role="alert">
-          <p>✓ Devolución registrada exitosamente</p>
-          {loanData.loan_id && <p>ID del préstamo: {loanData.loan_id}</p>}
-          {!loanData.days_late && <p>No hay multa por esta devolución.</p>}
+      {success && loanData && !loanData.days_late && (
+        <div className={styles.alertSuccess} role="alert">
+          <CheckCircle size={20} aria-hidden={true} />
+          <div>
+            <p>Devolución registrada exitosamente.</p>
+            {loanData.loan_id && <p className={styles.alertDetail}>ID del préstamo: {loanData.loan_id}</p>}
+            <p className={styles.alertDetail}>No se generó multa.</p>
+          </div>
         </div>
       )}
 
-      {success && loanData && loanData.days_late && (
+      {success && loanData && loanData.days_late > 0 && (
+        <div className={styles.alertSuccess} role="alert">
+          <CheckCircle size={20} aria-hidden={true} />
+          <div>
+            <p>Devolución registrada exitosamente.</p>
+            {loanData.loan_id && <p className={styles.alertDetail}>ID del préstamo: {loanData.loan_id}</p>}
+          </div>
+        </div>
+      )}
+
+      {success && loanData && loanData.days_late > 0 && (
         <DebtSummary debt={loanData} />
       )}
 
       <form onSubmit={handleSubmit} className={styles.form}>
-        <fieldset>
-          <legend>Información del Libro</legend>
+        <fieldset className={styles.fieldset}>
+          <legend className={styles.legend}>Identificación del Préstamo</legend>
+          <p className={styles.helperText}>
+            <Search size={16} aria-hidden={true} />
+            Ingresa al menos el ID del libro o la identificación del lector para localizar el préstamo.
+          </p>
 
           <div className={styles.formGroup}>
-            <label htmlFor="idBook">ID del Libro (opcional si proporciona ID del lector)</label>
+            <label htmlFor="idBook" className={styles.label}>ID del Libro</label>
             <input
+              ref={idBookRef}
               id="idBook"
               type="text"
               value={idBook}
-              onChange={(e) => setIdBook(e.target.value)}
+              onChange={(e) => { setIdBook(e.target.value); setBusinessError(null); setSearchError(''); }}
               placeholder="Ej: BOOK-001"
+              className={styles.input}
+              disabled={isLoading}
             />
+            {searchError && !idReader.trim() && (
+              <span className={styles.fieldError} id="idBook-error">{searchError}</span>
+            )}
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="title">
-              Nombre del Libro 
-              {idBook ? ' (opcional)' : ' (requerido si no proporciona ID del libro)'}
-            </label>
+            <label htmlFor="title" className={styles.label}>Título del Libro</label>
             <input
               id="title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ej: El señor de los anillos"
-              disabled={!idBook}
+              placeholder="Ej: Cien años de soledad"
+              disabled={!idBook || isLoading}
+              className={styles.input}
             />
-            {!idBook && title && (
-              <span className={styles.fieldError}>
-                El nombre solo se usa cuando especifica el ID del libro
-              </span>
+            <span className={styles.hint}>Opcional. Refina la búsqueda si hay múltiples copias.</span>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="typeIdReader" className={styles.label}>Tipo de Identificación *</label>
+            <select
+              id="typeIdReader"
+              value={typeIdReader}
+              onChange={(e) => setTypeIdReader(e.target.value)}
+              disabled={isLoading}
+              className={styles.select}
+            >
+              <option value="CI">Cédula de Identidad (CI)</option>
+              <option value="DNI">Documento Nacional de Identificación (DNI)</option>
+            </select>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="idReader" className={styles.label}>Número de Identificación del Lector</label>
+            <input
+              id="idReader"
+              type="text"
+              value={idReader}
+              onChange={(e) => { setIdReader(e.target.value); setBusinessError(null); setSearchError(''); }}
+              placeholder="Ej: 1023456789"
+              disabled={isLoading}
+              className={styles.input}
+            />
+            {searchError && !idBook.trim() && (
+              <span className={styles.fieldError} id="idReader-error">{searchError}</span>
             )}
           </div>
         </fieldset>
 
-        <fieldset>
-          <legend>Información de la Devolución</legend>
+        <fieldset className={styles.fieldset}>
+          <legend className={styles.legend}>Información de Devolución</legend>
 
           <div className={styles.formGroup}>
-            <label htmlFor="dateReturn">Fecha de Devolución *</label>
+            <label htmlFor="dateReturn" className={styles.label}>Fecha de Devolución *</label>
             <input
               id="dateReturn"
               type="date"
@@ -271,52 +285,26 @@ export default function ReturnForm() {
               onChange={handleDateChange}
               max={maxDate}
               required
+              className={styles.input}
+              disabled={isLoading}
+              aria-describedby={dateError ? 'dateReturn-error' : undefined}
             />
             {dateError && (
-              <span className={styles.fieldError}>{dateError}</span>
+              <span className={styles.fieldError} id="dateReturn-error">{dateError}</span>
             )}
             {dateReturn && !dateError && (
-              <span className={styles.fieldHint}>
+              <span className={styles.hint}>
                 Devolución en: {formatDisplayDate(dateReturn)}
               </span>
             )}
           </div>
         </fieldset>
 
-        <fieldset>
-          <legend>Información del Lector</legend>
+        <fieldset className={styles.fieldset}>
+          <legend className={styles.legend}>Configuración de Multa</legend>
 
           <div className={styles.formGroup}>
-            <label htmlFor="typeIdReader">Tipo de Identificación *</label>
-            <select
-              id="typeIdReader"
-              value={typeIdReader}
-              onChange={(e) => setTypeIdReader(e.target.value)}
-            >
-              <option value="DNI">Documento Nacional de Identificación (DNI)</option>
-              <option value="CI">Cédula de Identidad (CI)</option>
-            </select>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="idReader">
-              ID del Lector (opcional si proporciona ID del libro)
-            </label>
-            <input
-              id="idReader"
-              type="text"
-              value={idReader}
-              onChange={(e) => setIdReader(e.target.value)}
-              placeholder="Ej: 1023456789"
-            />
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Configuración de Multa</legend>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="baseFibAmount">Base de Multa Fibonacci (unidad monetaria)</label>
+            <label htmlFor="baseFibAmount" className={styles.label}>Base de Multa Fibonacci (unidad monetaria) *</label>
             <input
               id="baseFibAmount"
               type="number"
@@ -326,35 +314,49 @@ export default function ReturnForm() {
               placeholder="Ej: 1.00"
               min="0.01"
               step="0.01"
+              className={styles.input}
+              disabled={isLoading}
+              aria-describedby={baseFibError ? 'baseFibAmount-error' : 'baseFibAmount-hint'}
             />
             {baseFibError && (
-              <span className={styles.fieldError}>{baseFibError}</span>
+              <span className={styles.fieldError} id="baseFibAmount-error">{baseFibError}</span>
             )}
-            {!baseFibError && baseFibAmount && (
-              <span className={styles.fieldHint}>
+            {!baseFibError && (
+              <span className={styles.hint} id="baseFibAmount-hint">
                 Este valor se multiplica por las unidades Fibonacci para calcular la multa total.
               </span>
             )}
           </div>
         </fieldset>
 
-        {searchError && (
-          <div className={styles.alert} data-type="error" role="alert">
-            {searchError}
+        {businessError && (
+          <div className={styles.businessAlert} role="alert">
+            <AlertCircle size={20} aria-hidden={true} />
+            {businessError}
           </div>
         )}
 
         <div className={styles.formActions}>
           <button
             type="submit"
-            className={styles.submitButton}
-            disabled={isLoading || !!dateError || !!baseFibError}
+            className={styles.submitBtn}
+            disabled={isLoading}
           >
-            {isLoading ? 'Registrando...' : 'Registrar Devolución'}
+            {isLoading ? (
+              <>
+                <span className={styles.spinner} aria-hidden="true"></span>
+                Registrando...
+              </>
+            ) : (
+              <>
+                <BookOpen size={16} aria-hidden={true} />
+                Registrar Devolución
+              </>
+            )}
           </button>
           <button
             type="button"
-            className={styles.resetButton}
+            className={styles.resetBtn}
             onClick={handleReset}
             disabled={isLoading}
           >
@@ -362,6 +364,10 @@ export default function ReturnForm() {
           </button>
         </div>
       </form>
+
+      {isLoading && (
+        <div aria-live="polite" className={styles.srOnly}>Registrando devolución...</div>
+      )}
     </div>
   );
 }

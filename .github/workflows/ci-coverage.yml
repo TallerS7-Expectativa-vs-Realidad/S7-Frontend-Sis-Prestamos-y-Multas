@@ -1,0 +1,57 @@
+name: frontend - Coverage Quality Gate
+
+on:
+  workflow_call:
+
+jobs:
+  coverage-check:
+    name: Verify Coverage Threshold (75%)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Clean npm cache
+        run: npm cache clean --force
+
+      - name: Clean and install dependencies
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
+          npm install --no-save @rollup/rollup-linux-x64-gnu@4.57.1
+
+      - name: Run unit tests with coverage analysis
+        run: npm run test:coverage
+
+      - name: Validate 75% coverage threshold
+        run: |
+          if [ ! -f coverage/coverage-summary.json ]; then
+            echo "❌ Coverage report not found"
+            exit 1
+          fi
+          
+          COVERAGE=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+          echo "Line coverage: ${COVERAGE}%"
+          
+          if (( $(echo "$COVERAGE < 75" | bc -l) )); then
+            echo "❌ Coverage is below 75% threshold ($COVERAGE%)"
+            echo "Required: 75% | Actual: ${COVERAGE}%"
+            exit 1
+          else
+            echo "✅ Coverage meets 75% threshold ($COVERAGE%)"
+          fi
+
+      - name: Generate coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage-report
+          path: Frontend/coverage/
+          retention-days: 5
