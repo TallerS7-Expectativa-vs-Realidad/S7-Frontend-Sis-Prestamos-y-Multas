@@ -1,0 +1,38 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+permissions:
+  issues: write
+
+jobs:
+  # ============================================
+  # STAGE 1: Unit Tests (en paralelo)
+  # ============================================
+  unit-test:
+    name: Pedido Unit Tests
+    uses: ./.github/workflows/ci-unit-frontend.yml
+
+  # ============================================
+  # STAGE 2: Code Coverage Quality Gate (75%)
+  # Falla si: coverage < 75%
+  # Depende de: unit-test (codigo debe ser estable)
+  # ============================================
+  coverage-check:
+    name: Coverage Quality Gate (75% threshold)
+    needs: [unit-test]
+    uses: ./.github/workflows/ci-coverage.yml
+
+  # ============================================
+  # STAGE 3: Docker Infrastructure
+  # Falla si: Dockerfile no construye o Nginx no responde
+  # Depende de: unit-test + coverage-check (codigo + calidad validados)
+  # ============================================
+  docker-smoke:
+    name: Docker Smoke Tests
+    needs: [unit-test, coverage-check]
+    uses: ./.github/workflows/ci-docker-smoke.yml
