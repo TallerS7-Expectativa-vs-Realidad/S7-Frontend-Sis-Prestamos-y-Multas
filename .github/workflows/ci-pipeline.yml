@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: Frontend CI Pipeline
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
   # STAGE 1: Unit Tests (en paralelo)
   # ============================================
   unit-test:
-    name: Pedido Unit Tests
+    name: Unit Tests
     uses: ./.github/workflows/ci-unit-frontend.yml
 
   # ============================================

@@ -4,20 +4,12 @@ on:
   workflow_call:
 
 jobs:
-  # -----------------------------------------
-  # Frontend Docker Build & Smoke Test
-  # Verifica que:
-  # - El Dockerfile construya correctamente
-  # - La imagen se levante sin errores
-  # - El contenedor responda en puerto 80
-  # - El servidor Nginx esté activo
-  # -----------------------------------------
   docker-smoke:
     name: Frontend Docker Smoke Test
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: Frontend
+        working-directory: .
     steps:
       - uses: actions/checkout@v4
 
