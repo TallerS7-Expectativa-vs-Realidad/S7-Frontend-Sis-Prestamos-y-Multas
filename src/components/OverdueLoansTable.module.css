@@ -1,0 +1,273 @@
+/* ====================== OverdueLoansTable – Design-token CSS ====================== */
+
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  margin: var(--space-6) 0;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead {
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.table th {
+  padding: var(--space-4);
+  text-align: left;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--color-border-default);
+  min-height: 56px;
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-surface-overlay);
+}
+
+.table td {
+  padding: var(--space-4);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+}
+
+.cellMono {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+/* ---- Composite cells ---- */
+
+.compositeCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.primaryText {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.secondaryText {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+/* ---- Days overdue ---- */
+
+.daysOverdue {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-feedback-error);
+}
+
+/* ---- Badge ---- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: rgba(184, 60, 43, 0.12);
+  color: var(--color-feedback-error);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* ---- Loading / skeleton ---- */
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  gap: var(--space-4);
+}
+
+.skeleton {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeletonRow {
+  height: 20px;
+  background: var(--color-surface-overlay);
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeletonRow {
+    background: linear-gradient(90deg, var(--color-surface-overlay) 25%, var(--color-border-default) 50%, var(--color-surface-overlay) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+  }
+}
+
+.skeletonRow:nth-child(1) { width: 100%; }
+.skeletonRow:nth-child(2) { width: 92%; }
+.skeletonRow:nth-child(3) { width: 88%; }
+.skeletonRow:nth-child(4) { width: 95%; }
+.skeletonRow:nth-child(5) { width: 90%; }
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---- Error state ---- */
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-16);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.errorIcon {
+  color: var(--color-feedback-error);
+}
+
+.errorHeading {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.errorText {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.retryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 40px;
+  padding: 0 var(--space-4);
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4;
+  cursor: pointer;
+  min-width: 40px;
+}
+
+.retryBtn:hover {
+  background-color: var(--color-surface-overlay);
+}
+
+.retryBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* ---- Empty state ---- */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.emptyIcon {
+  color: var(--color-text-secondary);
+}
+
+.emptyTitle {
+  margin: var(--space-4) 0 var(--space-2) 0;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+}
+
+.emptyText {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+/* ---- Info footer ---- */
+
+.info {
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--color-border-default);
+  text-align: right;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}

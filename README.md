@@ -1,106 +1,337 @@
-# Biblioteca: Sistema de Préstamos y Multas
+# Frontend - Sistema de Préstamos y Multas
 
-MVP documental para definir cómo una biblioteca controla préstamos de libros, fechas de devolución, multas por retraso y rehabilitación del lector después del pago.
+🏗️ **Este es un repositorio de servicios independientes dentro de la arquitectura modular del proyecto.**
 
-## Equipo
+Otros repositorios correlacionados:
+- [**Backend**](../S7-Backend-Sis-Prestamos-y-Multas/) - Node.js + Express + PostgreSQL
+- [**Arquitectura & Documentación**](../S7-Arquitectura/) - Specs, PRD, Test Plans
 
-- [Alexander Molina](https://github.com/AlexRieger47) - QA
-- [Gabriel Perero](https://github.com/GabrielGNP) - DEV
+---
 
-## Qué problema resuelve
+## 📋 Descripción
 
-La biblioteca necesita una forma clara y consistente de:
+Aplicación web para gestionar préstamos de libros y pagos de multas. Interfaz moderna y responsiva construida con **React 18**, **Vite** y **CSS Modules**.
 
-- saber si un libro está disponible o prestado;
-- registrar préstamos con fecha de devolución válida;
-- detectar devoluciones tardías;
-- calcular multas acumulativas por retraso;
-- bloquear nuevos préstamos a lectores con deuda pendiente;
-- rehabilitar al lector cuando paga la multa completa.
+**Funcionalidades principales:**
+- Búsqueda de disponibilidad de libros
+- Registro de nuevos préstamos
+- Registro de devoluciones (a tiempo o tardía)
+- Visualización de préstamos vencidos
+- Gestión de pagos de deudas
+- Cálculo automático de multas con serie de Fibonacci
 
-Esta entrega no construye todavía el software. Su objetivo es dejar una base de producto y backlog lista para implementación posterior.
+---
 
-## Qué incluye este repositorio
+## 🏛️ Arquitectura
 
-- Un PRD con visión, reglas del negocio, alcance del MVP y riesgos.
-- Historias de usuario con valor de negocio, criterios de aceptación, escenarios Gherkin y Story Points.
-- Subtareas DEV y QA por cada historia.
-- Trazabilidad documental del flujo principal del MVP.
-- Referencia al tablero de GitHub Projects para el backlog del taller.
+### Patrón de Flujo
 
-## Alcance del MVP documental
+```
+pages → components → hooks → services → API Backend
+```
 
-### Dentro del alcance
+### Estructura de Directorios
 
-- Registrar el préstamo de un libro disponible.
-- Permitir solo plazos de 7, 14 o 21 días.
-- Calcular automáticamente la fecha de devolución.
-- Registrar devoluciones dentro del plazo sin multa.
-- Registrar devoluciones tardías con multa acumulativa.
-- Aplicar lógica de multa Fibonacci por semanas de mora.
-- Consultar préstamos vencidos y lector responsable.
-- Registrar el pago total de una multa para rehabilitar al lector.
-- Bloquear préstamos a lectores con deuda pendiente.
+```
+S7-Frontend-Sis-Prestamos-y-Multas/
+├── src/
+│   ├── main.jsx                    # Entry point de React
+│   ├── App.jsx                     # Enrutamiento principal
+│   ├── App.module.css              # Estilos globales
+│   ├── index.css                   # Normalize/base styles
+│   ├── pages/                      # Páginas (rutas)
+│   │   ├── LoanSearchPage.jsx      # HU-01: Búsqueda de disponibilidad
+│   │   ├── LoanPage.jsx            # HU-02: Registrar préstamo
+│   │   ├── ReturnPage.jsx          # HU-03/04: Registrar devolución
+│   │   ├── OverduePage.jsx         # HU-05: Préstamos vencidos
+│   │   ├── DebtPaymentPage.jsx     # HU-06: Pago de deuda
+│   │   ├── LoanCombinedPage.jsx    # Vista combinada (experimental)
+│   │   └── NotImplementedPage.jsx  # Placeholder
+│   ├── components/                 # Componentes reutilizables
+│   │   ├── Navigation.jsx          # Navbar con enlaces
+│   │   ├── LoanSearch.jsx          # Búsqueda de libro (HU-01)
+│   │   ├── LoanForm.jsx            # Formulario préstamo (HU-02)
+│   │   ├── ReturnForm.jsx          # Formulario devolución (HU-03/04)
+│   │   ├── OverdueLoansTable.jsx   # Tabla de préstamos vencidos (HU-05)
+│   │   ├── DebtSummary.jsx         # Resumen de deudas
+│   │   ├── DebtPaymentForm.jsx     # Formulario pago (HU-06)
+│   │   └── *.module.css            # Estilos scoped (CSS Modules)
+│   ├── hooks/                      # Custom hooks (futuro)
+│   ├── services/                   # Llamadas HTTP a backend
+│   │   ├── loanService.js          # API: GET/POST/PATCH /loans
+│   │   └── debtService.js          # API: GET/POST /debt
+│   └── __tests__/                  # Tests con Vitest + Testing Library
+│       ├── setup.js                # Configuración de tests
+│       ├── components/
+│       ├── hooks/
+│       └── pages/
+├── vite.config.js                  # Configuración Vite
+├── Dockerfile                      # Multi-stage build
+├── .dockerignore
+├── package.json
+└── index.html
+```
 
-### Fuera del alcance
+---
 
-- Prórrogas de préstamo.
-- Reservas.
-- Administración completa del catálogo.
-- Membresías o administración de usuarios.
-- Notificaciones automáticas.
-- Pagos parciales.
-- Reportería avanzada.
+## 🚀 Instalación y Configuración
 
-## Historias del MVP
+### Requisitos Previos
 
-- HU-01: Consultar estado y disponibilidad de un libro.
-- HU-02: Registrar libro disponible a un lector habilitado.
-- HU-03: Registrar devolución de un libro dentro del plazo.
-- HU-04: Registrar devolución tardía y generar multa Fibonacci.
-- HU-05: Consultar libros fuera de plazo y lector responsable.
-- HU-06: Registrar el pago total de una multa y rehabilitación del lector.
+- **Node.js** 18+ o **Docker**
+- **npm** o **yarn**
+- Backend API corriendo en `http://localhost:3000` (por defecto)
 
-## Reparto de trabajo DEV y QA
+### Opción A: Con Docker (Recomendado)
 
-### DEV
+#### Paso 1: Construir la imagen
 
-- Traducir cada historia a componentes técnicos concretos.
-- Definir subtareas de UI, endpoints, persistencia, validaciones y lógica de dominio.
-- Aterrizar el comportamiento esperado del sistema en trabajo implementable.
+```bash
+cd S7-Frontend-Sis-Prestamos-y-Multas
+docker build -t frontend-s7 .
+```
 
-### QA
+#### Paso 2: Ejecutar el contenedor
 
-- Definir criterios de aceptación verificables.
-- Redactar escenarios Gherkin centrados en comportamiento de negocio.
-- Diseñar validaciones, alternos, bordes, datos de prueba y notas de calidad.
+```bash
+docker run -d --name frontend-s7 -p 8080:80 frontend-s7
+```
 
-## Documentos principales
+Accede en: **http://localhost:8080**
 
-- [PRD.md](https://github.com/GabrielGNP/S6-Biblioteca-Sistema-de-Prestamos-y-Multas/blob/main/PRD.md)
-- [USER_STORIES.md](https://github.com/GabrielGNP/S6-Biblioteca-Sistema-de-Prestamos-y-Multas/blob/main/USER_STORIES.md)
-- [SUBTASKS.md](https://github.com/GabrielGNP/S6-Biblioteca-Sistema-de-Prestamos-y-Multas/blob/main/SUBTASKS.md)
+### Opción B: Local (desarrollo)
 
-## Tablero de trabajo
+#### 1. Instalar dependencias
 
-- [GitHub Projects del repositorio](https://github.com/users/GabrielGNP/projects/8/)
+```bash
+cd S7-Frontend-Sis-Prestamos-y-Multas
+npm install
+```
 
-## Definition of Ready
+#### 2. Configurar variables de entorno
 
-Una historia se considera lista cuando:
+```bash
+# Crear archivo (opcional, usa defaults)
+cat > .env.local << EOF
+VITE_API_URL=http://localhost:3000
+EOF
+```
 
-- Tiene valor de negocio claro.
-- Sus reglas relacionadas están identificadas.
-- Sus criterios de aceptación son entendibles y verificables.
-- Tiene subtareas DEV y QA coherentes.
-- Tiene una estimación razonable en Story Points.
+#### 3. Iniciar servidor de desarrollo
 
-## Definition of Done
+```bash
+npm run dev
+```
 
-Para esta entrega documental, una historia se considera terminada cuando:
+Accede en: `http://localhost:5173` (o puerto mostrado en consola)
 
-- Queda redactada en [USER_STORIES.md](https://github.com/GabrielGNP/S6-Biblioteca-Sistema-de-Prestamos-y-Multas/blob/main/USER_STORIES.md).
-- Tiene criterios de aceptación y escenarios Gherkin.
-- Tiene subtareas DEV y QA en [SUBTASKS.md](https://github.com/GabrielGNP/S6-Biblioteca-Sistema-de-Prestamos-y-Multas/blob/main/SUBTASKS.md).
-- Su estimación es coherente con el trabajo descrito.
-- Mantiene consistencia con el PRD y con el tablero.
+---
+
+## 🧩 Componentes Principales
+
+### Páginas
+
+| Ruta | Componente | Propósito | Estado |
+|------|-----------|----------|--------|
+| `/` | `LoanSearchPage` | Buscar disponibilidad | HU-01 ✅ |
+| `/loan` | `LoanPage` | Registrar préstamo | HU-02 ✅ |
+| `/return` | `ReturnPage` | Registrar devolución | HU-03, HU-04 ✅ |
+| `/overdue` | `OverduePage` | Ver préstamos vencidos | HU-05 ✅ |
+| `/debt-payment` | `DebtPaymentPage` | Pagar deuda | HU-06 ✅ |
+
+### Componentes Reutilizables
+
+#### `LoanSearch`
+Búsqueda de disponibilidad de libro (case-insensitive)
+- Props: `onSearch(title)`, `onResult(data)`
+- Estado: disponible/no disponible
+
+#### `LoanForm`
+Formulario para registrar nuevo préstamo
+- Valida: `id_book`, `title`, `id_reader`, `name_reader`, `loan_days` (7|14|21)
+- Maneja: errores de libro no disponible / lector con deuda
+
+#### `ReturnForm`
+Formulario para registrar devolución
+- Captura: `date_return`, `id_reader`
+- Calcula automáticamente: multa por retraso (si aplica)
+
+#### `OverdueLoansTable`
+Tabla de préstamos vencidos
+- Muestra: `book`, `reader`, `date_limit`, `days_overdue`, `debt`
+
+#### `DebtSummary`
+Resumen de deuda del lector
+- Muestra: `state_debt`, `amount_debt`, botón de pago
+
+#### `DebtPaymentForm`
+Formulario para registrar pago
+- Valida que haya deuda pendiente
+- Rehabilita al lector tras pago exitoso
+
+---
+
+## 📡 Integración con Backend
+
+### Services
+
+#### `loanService.js`
+```javascript
+// Búsqueda de disponibilidad
+searchByName(bookName)          // GET /api/v1/loans/{name}
+
+// Registrar préstamo
+createLoan(loanData)            // POST /api/v1/loans
+
+// Registrar devolución
+processReturn(returnData)       // PATCH /api/v1/loans
+
+// Listar vencidos
+getOverdueLoans()               // GET /api/v1/loans/overdue
+```
+
+#### `debtService.js`
+```javascript
+// Obtener deuda de lector
+getDebtByReader(id_reader)      // GET /api/v1/debt/{id_reader}
+
+// Registrar pago
+payDebt(paymentData)            // POST /api/v1/debt/pay
+```
+
+### Variables de Entorno
+
+```env
+# URL del backend (por defecto: http://localhost:3000)
+VITE_API_URL=http://localhost:3000
+```
+
+**Nota:** Se accede vía `import.meta.env.VITE_API_URL` en componentes.
+
+---
+
+## 🎨 Estilos
+
+### Sistema de Estilos
+
+- **CSS Modules**: Scope local por componente
+- **Enfoque**: Utilitario + componentes
+- **Patrón de nombres:** `ComponentName.module.css`
+
+```css
+/* Ejemplo: LoanForm.module.css */
+.container { }
+.title { }
+.input { }
+.button { }
+.error { }
+```
+
+### Convenciones
+
+- Variables de color, spacing y typo centralizadas
+- Sin dependencias externas de CSS (solo React + vanilla CSS)
+- Responsive-first approach
+
+---
+
+## 🧪 Testing
+
+### Archivos de Test
+
+```
+src/__tests__/
+├── setup.js                      # Configuración de vitest + DOM
+├── components/
+│   ├── LoanSearch.test.jsx
+│   ├── LoanForm.test.jsx
+│   └── ... (otros componentes)
+├── hooks/                        # Custom hooks (futuro)
+└── pages/                        # Integración
+```
+
+### Ejecutar Tests
+
+```bash
+# Tests una sola vez
+npm test
+
+# Watch mode
+npm test:watch
+
+# Con cobertura
+npm run test:coverage
+```
+
+### Stack de Testing
+
+- **Framework**: Vitest (compatible con Jest)
+- **DOM**: jsdom
+- **Utilidades**: React Testing Library
+- **Aserciones**: Expect (jest-dom)
+
+---
+
+## 🛠️ Scripts Disponibles
+
+```bash
+# Desarrollo
+npm run dev              # Inicia Vite dev server (http://localhost:5173)
+
+# Producción
+npm run build            # Compila para producción (carpeta dist/)
+npm run preview          # Preview local de build producción
+
+# Testing
+npm test                 # Ejecuta tests
+npm run test:watch      # Watch mode
+npm run test:coverage   # Reporte de cobertura
+
+# Calidad
+npm run lint            # ESLint
+npm run format          # Prettier
+```
+
+---
+
+## 🔄 Flujo de Datos (Ejemplo: HU-01)
+
+```
+1. Usuario escribe nombre de libro
+                ↓
+2. LoanSearchPage → LoanSearch component
+                ↓
+3. onClick → loanService.searchByName(title)
+                ↓
+4. GET /api/v1/loans/{title} (Backend)
+                ↓
+5. Response: { available: true, book: {...} }
+                ↓
+6. setState + render resultado
+```
+
+---
+
+## 📚 Documentación Relacionada
+
+- [**PRD**](../S7-Arquitectura/PRD.md) - Requisitos del producto
+- [**Specs ASDD**](../S7-Arquitectura/.github/specs/) - Especificaciones técnicas detalladas
+- [**Test Plan**](../S7-Arquitectura/TEST_PLAN.md) - Estrategia de testing
+- [**Backend README**](../S7-Backend-Sis-Prestamos-y-Multas/README.md) - Documentación de API
+- [**Arquitectura Global**](../S7-Arquitectura/CONTRIBUTING.md) - Guía de contribución
+
+---
+
+## 👥 Equipo y Contacto
+
+Proyecto desarrollado para **Sofka**.
+
+Equipo:
+- **QA**: Alexander Molina
+- **DEV**: Gabriel Perero
+
+---
+
+## 📄 Licencia
+
+ISC

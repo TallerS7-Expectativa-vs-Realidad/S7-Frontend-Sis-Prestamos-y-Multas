@@ -1,0 +1,59 @@
+name: Docker Smoke Tests
+
+on:
+  workflow_call:
+
+jobs:
+  docker-smoke:
+    name: Frontend Docker Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg VITE_API_URL=http://localhost:3000 \
+            --tag s7-frontend:smoke-test \
+            -f Dockerfile .
+          echo "✓ Docker image built successfully"
+
+      - name: Run container
+        run: |
+          docker run -d \
+            --name frontend-smoke-test \
+            -p 8888:80 \
+            s7-frontend:smoke-test
+          echo "✓ Container started on port 8888"
+
+      - name: Wait for Nginx to be ready
+        run: |
+          echo "Checking Nginx health..."
+          for i in {1..30}; do
+            if curl -fsS http://localhost:8888 > /dev/null 2>&1; then
+              echo "✓ Nginx is responding (attempt $i)"
+              RESPONSE=$(curl -fsS http://localhost:8888)
+              echo "✓ Frontend container is ready"
+              break
+            fi
+            sleep 2
+            if [ $i -eq 30 ]; then
+              echo "✗ Nginx not ready after 60s"
+              docker logs frontend-smoke-test
+              exit 1
+            fi
+          done
+
+      - name: Verify container health
+        run: |
+          echo "Container status:"
+          docker ps | grep frontend-smoke-test
+          echo "✓ Container running successfully"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop frontend-smoke-test || true
+          docker rm frontend-smoke-test || true
+          docker rmi s7-frontend:smoke-test || true
+          echo "✓ Cleanup completed"
